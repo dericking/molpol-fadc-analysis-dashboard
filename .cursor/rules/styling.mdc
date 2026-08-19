@@ -1,0 +1,30 @@
+---
+description: Styling conventions - everything lives in assets/style.css
+globs: **/*.php,assets/style.css
+alwaysApply: false
+---
+
+# Styling
+
+Put styles in `assets/style.css`, not page-local `<style>` blocks.
+
+- Design tokens (`:root`): `--paper`, `--ink`, `--ink-soft`, `--rule`,
+  `--accent`, `--card-bg`, `--quality-*`, `--font-display`, `--font-mono`,
+  plus index tokens (`--view-toggle-active-*`, `--search-button-*`,
+  `--list-table-header-*`). Prefer tokens over raw hex in new rules.
+- Shared components: `.card`, `.section-header`, `.empty-state`, `.comment-box`,
+  `.run-summary`, `.modal` / `:target`, `dl.fields`, `form.filters`,
+  `.view-toggle`, `.quality-tag` / `.quality-tag-*`, `.site-navbar`
+  (optional master top bar from `layout_navbar.php`; colors via
+  `--site-nav-*` in `:root`).
+- List UI: `.date-heading`, `.card-grid`, `.run-card*`, `.list-table*`,
+  `.search-row`, `.cap-note`.
+- Detail chrome: `.subtitle` under `h1` for nav; `dl.fields` top margin only.
+- Row layout: `.card-row`, `.cols-1`–`.cols-4`, `.card-spacer`, `.featured-row`
+  (see `render-helpers-pattern.mdc`). New column counts need a `.cols-N` rule.
+- Width: `.wrap-wide`. Narrow single-topic help: also `.wrap-help`. Index shell:
+  `body.index-app`, `.index-shell`, `.index-chrome`, `.index-body`, `.index-scroll`,
+  `.filters-top` / side-panel classes.
+
+**Pages should have zero `<style>` blocks** unless introducing a new layout
+primitive that does not fit the existing system.

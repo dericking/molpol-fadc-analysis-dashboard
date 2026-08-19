@@ -1,0 +1,20 @@
+---
+description: Core principle - pages must degrade gracefully as the schema evolves
+alwaysApply: true
+---
+
+# Core Principle: Schema-Driven, Always
+
+The upstream schema can evolve without notice. **Every page must degrade
+gracefully to a schema change, not break.**
+
+- Never hardcode a column list in PHP. Use `get_table_columns($pdo, $table)`,
+  which reads `INFORMATION_SCHEMA.COLUMNS` at request time. New columns appear
+  with their `COLUMN_COMMENT` as the label.
+- Column *grouping* is not in the schema. Rules live in
+  `includes/layouts/layout_sections.php`; thin `classify_*_column()` wrappers
+  in `render_helpers.php` apply them (`column-classifiers.mdc`). Unmatched
+  columns must **never silently vanish** — they fall into `'Other'` (sorted
+  last) via `group_columns_by_section()`.
+- Always apply that table’s `exclude` list **before** grouping (PK,
+  `last_updated`, fields rendered elsewhere). See `gotchas.mdc`.

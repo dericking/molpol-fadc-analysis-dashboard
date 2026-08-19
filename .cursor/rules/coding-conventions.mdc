@@ -1,0 +1,20 @@
+---
+description: PHP coding conventions - escaping, prepared statements, input validation
+globs: **/*.php
+alwaysApply: false
+---
+
+# Coding Conventions
+
+- Pages `require_once __DIR__ . '/includes/bootstrap.php'` once.
+- `htmlspecialchars()` every untrusted value shown as text. Exception: trusted
+  catalog HTML in `descriptions_errors.php` `body` / `fix` on `help_errors.php`
+  only — never echo request input as HTML.
+- Prepared statements / bound parameters only. Table/column names in SQL come
+  from `get_table_columns()` or fixed constants — never from request input.
+- Validate run/group ids (`FILTER_VALIDATE_INT`) with an explicit 400 on failure.
+- Prefer `array_filter` / `array_map` / `fn()` for column-list transforms, matching
+  existing `render_helpers.php` style.
+- Layout / classifier / column-order edits go in `includes/layouts/` — not inline
+  in page files. No URLs in most layout files; the app owns hrefs. Exception:
+  `layout_navbar.php` holds site-wide nav `href`s by design.

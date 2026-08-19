@@ -1,0 +1,73 @@
+# =============================================================================
+# .gitignore — PHP site + Docker local test stack
+# =============================================================================
+
+# ----- Secrets & local overrides (never commit) -----
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+**/db.local.php
+**/config.local.php
+# Deployed credentials copy written by tools/init_site.sh
+# (dbconnect-<random>.local.php). Must never be committed.
+*.local.php
+
+# ----- Local / scratch backups -----
+*.bak
+*.bak.*
+*.orig
+*.tmp
+*~
+
+# ----- Logs & runtime -----
+*.log
+logs/
+tmp/
+temp/
+cache/
+
+# ----- PHP / Composer (vendor never; lockfile OK to commit if you add Composer) -----
+/vendor/
+composer.phar
+
+# ----- OS -----
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ----- Editors / IDEs -----
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+.*.sw[a-p]
+\#*\#
+.\#*
+*.code-workspace
+
+# ----- Cursor local state (keep .cursor/rules tracked) -----
+.cursor/projects/
+.cursor/**/agent-transcripts/
+.cursor/**/terminals/
+
+# ----- Docker personal overrides / DB dumps -----
+docker-compose.override.yml
+docker/docker-compose.override.yml
+*.sql.gz
+*.dump
+
+# ----- Coverage / test caches (if tooling is added later) -----
+.phpunit.result.cache
+.php-cs-fixer.cache
+coverage/
+.htmlcov/
+
+# ----- Misc -----
+*.pid
+.cache/

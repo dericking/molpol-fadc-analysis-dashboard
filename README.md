@@ -1,0 +1,229 @@
+# Møller Polarimetry Run Log
+
+Read-only PHP dashboard over a MariaDB run-log / DAQ database for the
+**Møller polarimeter** (not the MOLLER experiment).
+
+The live schema is owned outside this site. This code only **reads** it.
+New columns are meant to appear without a PHP change; presentation
+(which card, which table column, which modal row) is maintained in
+layout files.
+
+PHP 8.1, no framework, PDO with prepared statements, one shared
+stylesheet (`assets/style.css`). No JavaScript: Run Info / Group Info
+are CSS `:target` modals.
+
+---
+
+## Data model
+
+| Table | Key | Role |
+|-------|-----|------|
+| `Run_info` | `run_number` | Parent run record |
+| `DAQ_config` | `run_number` | Per-run DAQ settings |
+| `EPICS_data` | `run_number` | Per-run EPICS snapshot |
+| `Analysis` | `run_number` | Per-run (prompt) analysis |
+| `Grouped_Analysis` | `group_number` | Group / final analysis landing spot |
+
+`Run_info.run_group` points a run at a group. A group page can show
+Grouped_Analysis, member runs, or both. Plots are files on disk under
+`{plots_base}/{run_number}/` or `{plots_base}/{group_number}/`.
+
+Type and quality on runs and groups are **codes** (`POLARIZATION`,
+`GOOD`) with English in shared lookup tables
+`run_type_lookup` and `run_quality_lookup` (`code`, `display_label`).
+The site never hardcodes those labels. Filter SQL and quality colors
+use the code; cards and the type dropdown show `display_label`.
+`PENDING` is the unset-quality code (not `UNDETERMINED`). `MIXED` is a
+**type** (groups whose member runs are not all the same type). `JUNK`
+and `TEST` are additional quality/type codes.
+
+---
+
+## Schema assumptions
+
+The site introspects `INFORMATION_SCHEMA` at request time
+(`get_table_columns()`). **Adding** a column with a `COLUMN_COMMENT` is
+the happy path: it shows up using that comment as the label (and EPICS
+`[PV: …]` when present). Unmatched columns land in **Other** /
+**Unallocated Sections**, not vanish.
+
+**Comments are load-bearing.** Do not strip `COLUMN_COMMENT`s; the UI
+has no second copy of those labels.
+
+### Identity (engine SQL)
+
+These names are used in queries, not only in layouts. Renaming or
+dropping them needs a site change (or the page 500s / cannot join):
+
+- Tables listed above
+- PKs `run_number`, `group_number`
+- Membership `Run_info.run_group`
+
+Also expected on the list pages (if missing, the index **warns** and
+keeps going):
+
+- `run_type` / `group_type` — type dropdown and filter (codes; labels from `run_type_lookup` when present)
+- `run_experiment` — experiment dropdown (distinct values from `Run_info`; groups match if any member run has that experiment)
+- `run_start` / `group_start` — date headings and from/to filter (else one **Unknown date**
+  bucket with an ⓘ; date filter disabled)
+
+`last_updated` is shown on detail headers when present; if absent the
+header shows `—`.
+
+### `*_err` pairing
+
+On detail cards, if both `foo` and `foo_err` exist, they render as one
+row: `value ± error`. The `_err` row is not listed separately. An
+orphan `*_err` with no base column still shows alone. A different error
+suffix (`foo_uncertainty`) is two rows, not a crash.
+
+### New tables
+
+A new table still needs a page (or a key in `section_view_table_map()`).
+Introspection does not invent pages.
+
+---
+
+## Layout-driven maintenance
+
+Caretakers change **what appears where** under `includes/layouts/`.
+**Touch** those files for presentation; **do not** edit other `includes/*.php`,
+page PHP, or CSS for routine “what shows where” tweaks (CSS only when a
+layout needs a class already in the design system).
+Header comments in the layout files are the instructions. Do not put DB
+credentials in layout files. Do not put URLs in most layouts (cards/tables
+use `'link' => 'run'|'group'`); the exception is
+`layout_navbar.php`, which is specifically for site-wide hrefs.
+
+| File | What it controls |
+|------|------------------|
+| `includes/layouts/layout_navbar.php` | Optional **master top navbar** (`links` with `href` + `label`). Empty `links` → bar hidden. Colors via `--site-nav-*` in `assets/style.css`. |
+| `includes/layouts/layout_cards.php` | Index / group-member **cards**. Optional `'link' => 'run'` or `'group'` on a cell (only that cell is a link). |
+| `includes/layouts/layout_tables.php` | Index / group-member **tables**. Same `link` keys. |
+| `includes/layouts/layout_report.php` | Report page **column catalog** + defaults (picker / CSV). |
+| `includes/layouts/layout_run_summary.php` | **Run Info** and **Group Info** modal rows + comment footer. |
+| `includes/layouts/layout_lookups.php` | Row column → lookup table, and quality **code** → CSS slug (`junk`, `pending`, …). Not display labels. |
+| `includes/layouts/layout_sections.php` | Detail-page **classifiers** (which column → which section), `exclude`, featured rows, named card bands (`main`, `other`, …). |
+
+Classifier unmatched columns still render under **Unallocated Sections**
+(rows of at most four). Hide leftovers from that band only via
+`ignore_sections` (they still show if also listed in featured/layouts).
+
+DAQ / Analysis / EPICS **groupings are yours to define** in
+`includes/layouts/layout_sections.php` when you are ready. Prefix rules (Analysis /
+Grouped_Analysis) and regex lists (EPICS / DAQ) are the mechanism;
+section titles in `featured` / `layouts` must match classifier `section`
+strings exactly.
+
+Site knobs that are **not** layouts: `includes/config.php` (title, index
+defaults, plot paths, browse `row_cap`, report `report_row_cap`).
+
+---
+
+## Status messages and help
+
+Stay-on-page empty states and warnings use `render_status_message()`.
+The circled **i** opens `help_errors.php?key=…` in a new tab.
+
+- `includes/descriptions_errors.php` — catalog (`summary`, `title`,
+  `body`, `fix`). `body` / `fix` are trusted HTML edited only in that
+  file.
+- `help_errors.php` — one topic with `?key=`; **no query** lists every
+  topic with a left nav.
+
+Examples: no Analysis row yet, no member runs, plot directory missing,
+index type/date column missing, `run_group` missing on the group page.
+
+---
+
+## Deploy / setup
+
+Single web server: PHP with PDO MySQL + the MariaDB this site reads.
+There is no build step.
+
+**Ship only the site, not the repo.** Design posture: assume an unhardened
+host that does not honor `.htaccess` and has directory listings on, so
+anything in the tree is reachable. Prefer exporting tracked files into
+the web directory rather than cloning there:
+
+```bash
+git archive HEAD | tar -x -C /path/to/webdir
+```
+
+That omits `.git`, ignored files, and untracked leftovers. Do not put
+`.cursor/`, `docker/`, or `*.md` notes in the published tree. 
+After any deploy that overwrites `includes/bootstrap.php`, re-run
+the init script (`--relink` is enough).
+
+**Database — first-time setup**
+
+`includes/dbconnect-template.php` is the tracked template. It holds
+placeholders only (`127.0.0.1`, `app_db`, `readonly_user`, `changeme`).
+Real credentials never go in that file.
+
+On the web server, from the site root:
+
+```bash
+./tools/init_site.sh
+```
+
+It copies the template to `includes/dbconnect-<random>.local.php`
+(git-ignored), writes the host / name / user / password you type, and
+repoints `bootstrap.php` at that copy. The random name is not stored
+anywhere in the repo, so a later `git archive` leaves it alone.
+
+Use a **SELECT-only** account, preferably granted only from the web
+server host. From the host, use **`127.0.0.1`**, not `localhost` — PHP’s
+MySQL driver treats `localhost` as a Unix socket and ignores the port.
+A real hostname (a separate DB server) is unaffected.
+
+The Docker test stack still uses `SITE_DB_*` environment variables and
+does not need this script.
+
+**Plots**
+
+Edit `run_plots_web_base` / `group_plots_web_base` and, if needed,
+`*_plots_fs_base` in `includes/config.php`. Site-relative web paths can
+omit `fs_base` (DOCUMENT_ROOT + web path). Absolute plot URLs need an
+explicit filesystem base.
+
+---
+
+## Local testing
+
+`docker/` is a **test-only** MariaDB + Apache/PHP stack, plus
+`docker/seed_junk_data.php` (quick fake runs). It is not how production
+is meant to run. See `docker/README.md`.
+
+---
+
+## Pages (entry points)
+
+| Page | Role |
+|------|------|
+| `index.php` | Run/group list (table or cards; top or side filters) |
+| `report.php` | Simple filtered run/group report (layout defaults) + CSV |
+| `report_advanced.php` | Same report with Available \| Selected column picker + CSV |
+| `detail_runs.php` | Analysis + plots; Run Info modal |
+| `detail_epics.php` | EPICS_data |
+| `detail_daq.php` | DAQ_config (canonical thin detail template) |
+| `detail_groups.php` | Grouped_Analysis + member runs + plots; Group Info modal |
+| `help_errors.php` | Status-help catalog |
+| `help_howto.php` | Caretaker how-to (schema changes + layouts) |
+
+Includes worth knowing: `bootstrap.php` (every page), `schema.php`,
+`render_helpers.php`, `index_query.php` / `index_filters.php` /
+`index_results.php`, `report_query.php`, `report_filters.php`, `report_results.php`, `includes/layouts/layout_report.php`.
+
+---
+
+## What to edit for what
+
+| Goal | Where |
+|------|--------|
+| Card / table / modal / detail grouping | `includes/layouts/` |
+| Site title, index defaults, plot paths | `includes/config.php` |
+| Help text for ⓘ | `includes/descriptions_errors.php` |
+| Live DB connection | `./tools/init_site.sh` (writes a git-ignored `*.local.php`; do not edit the template) |
+| CSS | `assets/style.css` only |
+| Page titles / empty-copy strings | The `Page copy` block at the top of each detail page |

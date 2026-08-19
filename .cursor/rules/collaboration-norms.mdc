@@ -1,0 +1,21 @@
+---
+description: Collaboration norms around external schema ownership
+alwaysApply: true
+---
+
+# Collaboration Norms
+
+- **The live schema is owned outside this site.** Renames, type changes, and
+  data-removing migrations are proposals for the schema owner — not edits to
+  apply to their source script unprompted. The Docker test schema
+  (`docker/init/01_schema.sql`) can be experimented with freely; a separate
+  proposed-SQL handoff file is the artifact for asking them to change something.
+- **Comment-only changes** (trimming a `COLUMN_COMMENT` for display) can be a
+  standalone `ALTER TABLE ... MODIFY COLUMN` against a local test container
+  without `down -v` and a full reseed.
+- Real bugs in pasted upstream SQL (malformed comment, FK to a missing column)
+  get fixed when unambiguous. Design choices (FK cascade, physical bounds) get
+  flagged, not silently changed.
+- **Site-only presentation** (card/table/section layouts, featured rows) does
+  not need schema-owner approval. DAQ groupings stay labeled *suggested* until
+  confirmed. Do not invent a prefix convention for a table they have not agreed to.

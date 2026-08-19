@@ -1,0 +1,29 @@
+---
+description: Local Docker test environment (MariaDB + Apache/PHP)
+globs: docker/**
+alwaysApply: false
+---
+
+# Local Docker Test Environment
+
+`docker/docker-compose.yml` runs:
+
+- DB service — MariaDB + `docker/init/*.sql` (schema, then privilege lockdown)
+- Web service — `php:8.1-apache` (`docker/Dockerfile` adds `pdo_mysql`), project
+  root bind-mounted; published on host port **8080**
+
+`docker/seed_junk_data.php` is mostly schema-driven (`INFORMATION_SCHEMA`).
+A few physically bounded quantities are special-cased by column name; if those
+columns are renamed, update that lookup in the seed.
+
+Compose DB names/users/passwords are **local placeholders only** (same idea as
+`includes/dbconnect-template.php` defaults). Do not commit real deployment
+credentials. The web container reaches the DB over the compose network via
+`SITE_DB_*` in compose.
+
+After changing `docker/init/01_schema.sql`, recreate volumes so init re-runs
+(`docker compose down -v && docker compose up -d --build` from `docker/`), then
+reseed. A plain `up -d` leaves the old schema in place.
+
+`docker compose` must be run from the directory that contains
+`docker-compose.yml` — see `gotchas.mdc`.

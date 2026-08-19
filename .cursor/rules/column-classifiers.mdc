@@ -1,0 +1,35 @@
+---
+description: Section layouts — classifiers, exclude, featured, and named card-layout bands
+globs: includes/render_helpers.php,includes/layouts/layout_sections.php
+alwaysApply: false
+---
+
+# Column Classifiers & Section Layouts
+
+Edit **`includes/layouts/layout_sections.php`** for which columns land where and
+how detail pages arrange cards. No URLs or DB credentials in that file.
+
+Each key (`analysis`, `epics`, `daq`, `grouped_analysis`) has:
+
+| Key | Role |
+|-----|------|
+| `exclude` | Columns omitted from cards (PK, `last_updated`, comments…) |
+| `classifier` | Ordered rules; first match wins; unmatched → `"Other"` |
+| `featured` | Full-width section title(s); prefer an array; `null` for none |
+| `layouts` | Named bands (`main`, optional `other`, …): rows of section titles (`null` = spacer). Featured titles must not also appear here. `unallocated` is reserved |
+| `ignore_sections` | Omit from the unallocated band only (still show if featured/laid out) |
+| `duplicate_into` | Optional (EPICS): also copy named columns into another section |
+
+`featured` / `layouts` / `ignore_sections` strings must match classifier
+`section` values exactly. Pages must call `render_unallocated_sections()`
+(≤4 cards per row; hidden when empty).
+
+## Classifier match modes
+
+Wrappers call `classify_column_from_rules()`:
+
+1. **`match` => `prefix`** — text before first `_` equals `key` (Grouped_Analysis).
+2. **`match` => `regex`** — `preg_match` (Analysis, EPICS, DAQ). Order matters
+   (e.g. `^fadc_tet$` before broader patterns). Prefer one pattern per line.
+
+DAQ groupings stay labeled **suggested** until the schema owner confirms them.

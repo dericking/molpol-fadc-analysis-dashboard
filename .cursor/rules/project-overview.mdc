@@ -1,0 +1,46 @@
+---
+description: What this site is, the stack, and the file map
+alwaysApply: true
+---
+
+# Project Overview
+
+Read-only PHP dashboard over a MariaDB DAQ / run-log database. Per-run tables
+`DAQ_config`, `EPICS_data`, and `Analysis` hang off `Run_info` (`run_number`).
+Aggregates live in `Grouped_Analysis` (`group_number`). The live schema is
+owned elsewhere; this site only reads it. Columns may change without notice —
+see `schema-driven-design.mdc` and caretaker how-to `help_howto.php`.
+
+## Stack
+
+- PHP 8.1, plain (no framework), PDO prepared statements.
+- MariaDB 11.x. `COLUMN_COMMENT` values are load-bearing (labels / EPICS PVs).
+- No JS framework / build step. Shared CSS in `assets/style.css`.
+  (Run/Group Info modals are CSS `:target` only.)
+- Local test stack: `docker/` (MariaDB + Apache/PHP).
+
+## File map (short)
+
+```
+includes/config.php              — Site knobs (no DB credentials, no layouts)
+includes/dbconnect-template.php  — PDO template; tools/init_site.sh copies to a
+                                   git-ignored local file. Prefer SELECT-only.
+                                   Override with SITE_DB_* at deploy time.
+includes/bootstrap.php           — config + dbconnect + schema + render_helpers
+includes/schema.php              — INFORMATION_SCHEMA helpers only
+includes/layouts/                — Caretaker presentation (touch these for UI)
+  layout_{navbar,cards,tables,sections,run_summary,lookups,report}.php
+includes/render_helpers.php      — Classify / group / render / require_* helpers
+includes/descriptions_errors.php — Status-help catalog (help_errors.php)
+includes/index_*.php             — Index filters / query / results
+includes/report_*.php            — Report filters / query / results
+index.php / detail_*.php         — Browse + detail pages
+report.php / report_advanced.php — Filtered table + CSV
+help_howto.php / help_errors.php — Caretaker how-to + status help
+assets/style.css                 — All shared styling
+docker/                          — Local test DB + web + seed
+```
+
+**Touch for presentation:** `includes/layouts/` only.  
+**Do not put** real passwords, hosts, or production account names in the repo
+or in these rules — use `SITE_DB_*` at deploy time.

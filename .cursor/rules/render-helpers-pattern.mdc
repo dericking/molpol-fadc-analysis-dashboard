@@ -1,0 +1,54 @@
+---
+description: Shared render helpers, section layouts, list cards/tables, and plots
+globs: includes/render_helpers.php,includes/layouts/**/*.php,includes/index_query.php,detail_runs.php,detail_epics.php,detail_daq.php,index.php,detail_groups.php,report.php,report_advanced.php
+alwaysApply: false
+---
+
+# The Render-Helpers Pattern
+
+Shared rendering lives in `includes/render_helpers.php`. Prefer those helpers
+over one-off loops in page files. Pages `require_once` `includes/bootstrap.php`
+once (`$config`, `$pdo`).
+
+Caretaker “what shows where” docs: layout file headers and `help_howto.php`.
+
+## Detail-page recipe
+
+Canonical thin template: `detail_daq.php`.
+
+```php
+$runNumber = require_positive_int_query('run');
+$runInfo   = require_row($pdo, 'Run_info', 'run_number', $runNumber, 'Run');
+$pack = load_section_view($pdo, 'daq', $runNumber);
+
+render_featured_rows($pack);
+render_section_cards($pack, 'main');
+render_section_header($otherHeading, $lastUpdatedLabel, $pack['last_updated']);
+render_section_cards($pack, 'other');
+render_layout_errors($pack);
+render_unallocated_sections($pack, $unallocatedHeading);
+```
+
+- `load_section_view()` — table/PK/classifier → pack (`row`, `sections`,
+  `featured_rows`, `layouts`, `last_updated`).
+- `render_unallocated_sections()` — **required** after layout bands (no-op if empty).
+- `render_status_message($key)` — on-page status + ⓘ → `help_errors.php?key=`.
+- Classifiers / `featured` / `layouts` / `exclude`: `includes/layouts/layout_sections.php`.
+  Band convention: `main` (always), optional `other`. Do not declare `unallocated`.
+
+## Detail field rendering
+
+- `render_field_list()` — `<dl class="fields">`. Pairs `foo` + `foo_err` as
+  `value ± error`.
+- `render_card_row()` / `render_featured_row()` — card bands / full-width rows
+  (`null` = spacer).
+
+## Index / cards / tables / summary / plots
+
+- Index: `index.php` + `includes/index_query.php` / `index_filters.php` /
+  `index_results.php` (`?panel=top|side`).
+- Cards / tables: `layout_cards.php` / `layout_tables.php` — no URLs in layouts;
+  optional `'link' => 'run'|'group'`. Cell kinds shared via `list_cell_html()`.
+- Run/Group Info: `layout_run_summary.php` + `render_run_summary()`.
+- Plots: `render_analysis_plots($config, 'run'|'group', $id)` — paths from
+  `includes/config.php`.
