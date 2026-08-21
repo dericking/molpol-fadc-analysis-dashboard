@@ -23,8 +23,8 @@
 # is the least essential.
 #
 # Verifying (from any machine that can reach the site):
-#   curl -o /dev/null -w '%{http_code}\n' https://SITE/README.md      -> 403
 #   curl -o /dev/null -w '%{http_code}\n' https://SITE/includes/schema.php -> 403
+#   curl -o /dev/null -w '%{http_code}\n' https://SITE/tools/init_site.sh  -> 403
 #   curl -sI https://SITE/index.php | grep -i x-content-type-options   -> present
 # A 200 on either of the first two means .htaccess is not in effect.
 # =============================================================================
@@ -37,6 +37,12 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule (^|/)\. - [F]
+
+    # includes/ is only ever required by page PHP — never hit as a URL.
+    RewriteRule ^includes(/|$) - [F]
+
+    # Deploy helpers under tools/ must not be downloadable as plain text.
+    RewriteRule ^tools/.*\.(sh|bash)$ - [F]
 </IfModule>
 
 

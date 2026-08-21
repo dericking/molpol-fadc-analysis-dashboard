@@ -143,17 +143,29 @@ There is no build step.
 
 **Ship only the site, not the repo.** Design posture: assume an unhardened
 host that does not honor `.htaccess` and has directory listings on, so
-anything in the tree is reachable. Prefer exporting tracked files into
-the web directory rather than cloning there:
+anything in the tree is reachable. Do not clone the repository into the
+web directory. Export from a clean commit with the allowlist script:
 
 ```bash
-git archive HEAD | tar -x -C /path/to/webdir
+# Dry run (default) — shows what would ship and any stale files in webdir
+./tools/production_export.sh /path/to/webdir
+
+# Write the export, then (optional) prune stale files after reviewing the list
+./tools/production_export.sh /path/to/webdir --apply
+./tools/production_export.sh /path/to/webdir --apply --prune
+
+# After apply, optional live probes (needs a reachable site URL)
+./tools/production_export.sh /path/to/webdir --apply --url https://SITE
 ```
 
-That omits `.git`, ignored files, and untracked leftovers. Do not put
-`.cursor/`, `docker/`, or `*.md` notes in the published tree. 
+Only paths listed in `SITE_PATHS` inside that script are archived from
+`HEAD` (pages, `assets/`, `includes/`, `.htaccess`, and `tools/init_site.sh`).
+`.cursor/`, `docker/`, `*.md`, tests, and the export script itself stay out.
+The credentials file `includes/dbconnect-*.local.php` is never in the repo
+and is never deleted by the export.
 After any deploy that overwrites `includes/bootstrap.php`, re-run
-the init script (`--relink` is enough).
+`./tools/init_site.sh --relink` in the web directory (the export script
+reminds you).
 
 **Database — first-time setup**
 

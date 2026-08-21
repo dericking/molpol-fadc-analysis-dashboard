@@ -32,7 +32,8 @@ project-root/
 ├── assets/
 │   └── style.css
 ├── tools/
-│   └── init_site.sh          Deploy: copy dbconnect template → *.local.php
+│   ├── init_site.sh              Deploy: copy dbconnect template → *.local.php
+│   └── production_export.sh      Allowlist export from HEAD → webdir
 ├── includes/
 │   ├── bootstrap.php
 │   ├── config.php            Site knobs (no DB credentials)
