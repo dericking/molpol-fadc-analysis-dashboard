@@ -227,6 +227,36 @@ Automated checks (after the stack is up and seeded): `php tests/run.php`,
 `./tests/smoke.sh`, `./tests/schema_drift.sh` — see **Local verification**
 above and `tests/MANUAL.md`.
 
+### Scale snapshot (local Docker, 2026-08-21)
+
+One-off check against `http://127.0.0.1:8090` with **20 000** `Run_info`
+rows (matching `Analysis` / `DAQ_config` / `EPICS_data` PK rows and
+**10 000** `Grouped_Analysis` rows). Caps unchanged (`row_cap` 300,
+`report_row_cap` 2000). Warm once, then five `curl` timings; table is
+**median** wall time. DB restored to the normal ~30-run junk seed
+afterward. No load-test script is kept in the tree.
+
+| URL | Median s | Body (approx) |
+|-----|---------:|--------------:|
+| `/index.php` | 0.013 | 138 k |
+| `/index.php?view=groups` | 0.014 | 106 k |
+| `/index.php?layout=cards` | 0.013 | 123 k |
+| `/index.php?type=POLARIZATION` | 0.014 | 143 k |
+| `/index.php?from=2025-01-01&to=2025-06-30` | 0.021 | 138 k |
+| `/report.php` | 0.038 | 1.3 M |
+| `/report.php?view=groups` | 0.027 | 839 k |
+| `/report.php?format=csv` | 0.026 | 174 k |
+| `/report_advanced.php` | 0.036 | 1.4 M |
+| `/detail_runs.php?run=20000` | 0.003 | 4 k |
+| `/detail_daq.php?run=20000` | 0.002 | 5 k |
+| `/detail_epics.php?run=20000` | 0.003 | 10 k |
+| `/detail_groups.php?group=1` | 0.011 | 5 k |
+| `/help_howto.php` | 0.001 | 42 k |
+
+On this laptop Docker path, capped browse/report stayed under ~50 ms at
+20 k runs. Heavier paths were date-range index and full report HTML.
+Detail pages were ~2–3 ms except group detail (~11 ms). Re-check ad hoc
+if production row counts or joins differ a lot.
 ---
 
 ## Pages (entry points)
