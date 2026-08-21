@@ -44,7 +44,9 @@ project-root/
 │   ├── config.php            Site knobs (no DB credentials)
 │   ├── dbconnect-template.php
 │   ├── schema.php            INFORMATION_SCHEMA helpers
-│   ├── render_helpers.php
+│   ├── render_helpers.php    Barrel → helpers_*.php
+│   ├── helpers_datetime.php / helpers_classify.php /
+│   │   helpers_render.php / helpers_plots.php / helpers_report.php
 │   ├── descriptions_errors.php
 │   ├── index_*.php / report_*.php
 │   └── layouts/              Caretaker presentation only

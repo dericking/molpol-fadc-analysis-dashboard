@@ -192,7 +192,7 @@ $pageTitle = ((string)($config['site_title'] ?? 'Møller Run Log')) . ' — How-
           table you must:
         </p>
         <ol>
-          <li>Add a page (or extend an existing one) and register it in <code>section_view_table_map()</code> in <code>includes/render_helpers.php</code> (table, PK, classifier function).</li>
+          <li>Add a page (or extend an existing one) and register it in <code>section_view_table_map()</code> in <code>includes/helpers_classify.php</code> (loaded via <code>render_helpers.php</code>; table, PK, classifier function).</li>
           <li>Add a matching key in <code>includes/layouts/layout_sections.php</code> (<code>exclude</code>, <code>classifier</code>, <code>featured</code>, <code>layouts</code>).</li>
           <li>Copy <code>detail_daq.php</code> (thin template), point it at that layout key, and wire nav links from run/group detail.</li>
           <li>Only then do caretaker layout polish (classifiers, featured, card bands).</li>

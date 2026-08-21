@@ -244,7 +244,7 @@ above and `tests/MANUAL.md`.
 | `help_howto.php` | Caretaker how-to (schema changes + layouts) |
 
 Includes worth knowing: `bootstrap.php` (every page), `schema.php`,
-`render_helpers.php`, `index_query.php` / `index_filters.php` /
+`render_helpers.php` (barrel for `helpers_*.php`), `index_query.php` / `index_filters.php` /
 `index_results.php`, `report_query.php`, `report_filters.php`, `report_results.php`, `includes/layouts/layout_report.php`.
 
 ---
