@@ -35,7 +35,8 @@ project-root/
 │   └── MANUAL.md
 ├── README.md                 Site overview (parent of this file)
 ├── assets/
-│   └── style.css
+│   ├── style.css
+│   └── site.js              Filter autosubmit + advanced column picker
 ├── tools/
 │   ├── init_site.sh              Deploy: copy dbconnect template → *.local.php
 │   └── production_export.sh      Allowlist export from HEAD → webdir

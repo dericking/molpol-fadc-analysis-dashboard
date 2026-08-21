@@ -67,15 +67,12 @@
     Header always set X-Frame-Options "SAMEORIGIN"
     Header always set Referrer-Policy "same-origin"
 
-    # 'unsafe-inline' in script-src is required by the site as written: the
-    # column picker in report_advanced.php is an inline <script>, and the
-    # filter dropdowns use inline onchange="this.form.submit()". Moving both
-    # to a file under assets/ would let this drop to "script-src 'self'",
-    # which is where the real XSS benefit is. style-src needs no exception —
-    # the site has no inline styles, and that restriction is live today.
-    # img-src assumes plots (if any) are served from this origin; an absolute
-    # plots URL in config.php would need its host added here.
-    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self' 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'; object-src 'none'"
+    # script-src 'self' only: filter autosubmit + advanced column picker live
+    # in assets/site.js (no inline scripts / handlers). style-src needs no
+    # exception — the site has no inline styles. img-src assumes plots (if
+    # any) are served from this origin; an absolute plots URL in config.php
+    # would need its host added here.
+    Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self'; script-src 'self'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'; object-src 'none'"
 
     # expose_php is a php.ini setting (PHP_INI_SYSTEM) and cannot be changed
     # from PHP or .htaccess — but the header it produces can be stripped here.

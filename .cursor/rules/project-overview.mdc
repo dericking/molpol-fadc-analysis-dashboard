@@ -15,8 +15,9 @@ see `schema-driven-design.mdc` and caretaker how-to `help_howto.php`.
 
 - PHP 8.1, plain (no framework), PDO prepared statements.
 - MariaDB 11.x. `COLUMN_COMMENT` values are load-bearing (labels / EPICS PVs).
-- No JS framework / build step. Shared CSS in `assets/style.css`.
-  (Run/Group Info modals are CSS `:target` only.)
+- No JS framework / build step. Shared CSS in `assets/style.css`;
+  minimal `assets/site.js` (filter autosubmit + advanced column picker)
+  for CSP `script-src 'self'`. Run/Group Info modals are CSS `:target` only.
 - Local test stack: `docker/` (MariaDB + Apache/PHP).
 
 ## File map (short)

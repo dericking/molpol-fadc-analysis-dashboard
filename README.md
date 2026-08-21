@@ -9,8 +9,9 @@ New columns are meant to appear without a PHP change; presentation
 layout files.
 
 PHP 8.1, no framework, PDO with prepared statements, one shared
-stylesheet (`assets/style.css`). No JavaScript: Run Info / Group Info
-are CSS `:target` modals.
+stylesheet (`assets/style.css`). Minimal JS in `assets/site.js` (filter
+autosubmit + advanced report column picker) so CSP can use
+`script-src 'self'`. Run Info / Group Info are CSS `:target` modals.
 
 ---
 

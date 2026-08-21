@@ -52,7 +52,7 @@
         <h2 class="panel-heading">Filters</h2>
       </div>
       <div class="top-nav-row top-nav-type-exp">
-        <select name="type" aria-label="Type" onchange="this.form.submit()" <?= $typeColumnMissing ? 'disabled' : '' ?>>
+        <select name="type" aria-label="Type" data-autosubmit <?= $typeColumnMissing ? 'disabled' : '' ?>>
           <option value="">Run Types</option>
           <?php foreach ($types as $t): ?>
             <?php
@@ -64,7 +64,7 @@
             </option>
           <?php endforeach; ?>
         </select>
-        <select name="experiment" aria-label="Experiment" onchange="this.form.submit()" <?= $experimentColumnMissing ? 'disabled' : '' ?>>
+        <select name="experiment" aria-label="Experiment" data-autosubmit <?= $experimentColumnMissing ? 'disabled' : '' ?>>
           <option value="">Experiments</option>
           <?php foreach ($experiments as $exp): ?>
             <?php $exp = (string)$exp; ?>
@@ -82,9 +82,9 @@
         <h2 class="panel-heading">Dates From–To</h2>
       </div>
       <div class="top-nav-row">
-        <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" onchange="this.form.submit()" <?= $dateColumnMissing ? 'disabled' : '' ?>>
+        <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
       </div>
       <div class="top-nav-row">
-        <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" onchange="this.form.submit()" <?= $dateColumnMissing ? 'disabled' : '' ?>>
+        <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
       </div>
     </div>

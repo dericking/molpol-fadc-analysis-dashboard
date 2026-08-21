@@ -61,5 +61,6 @@ require_once __DIR__ . '/includes/index_query.php';
   </div>
 
 </div>
+<script src="assets/site.js" defer></script>
 </body>
 </html>

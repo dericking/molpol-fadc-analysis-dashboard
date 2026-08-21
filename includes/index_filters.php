@@ -46,7 +46,7 @@ $formClass = $filtersVariant === 'side' ? 'filters filters-panel' : 'filters fil
 
     <div class="panel-block">
       <h2 class="panel-heading">Filters</h2>
-      <select name="type" onchange="this.form.submit()" aria-label="Type">
+      <select name="type" data-autosubmit aria-label="Type">
         <option value="">Run Types</option>
         <?php foreach ($types as $t): ?>
           <?php
@@ -58,7 +58,7 @@ $formClass = $filtersVariant === 'side' ? 'filters filters-panel' : 'filters fil
           </option>
         <?php endforeach; ?>
       </select>
-      <select name="experiment" onchange="this.form.submit()" aria-label="Experiment" <?= $experimentColumnMissing ? 'disabled' : '' ?>>
+      <select name="experiment" data-autosubmit aria-label="Experiment" <?= $experimentColumnMissing ? 'disabled' : '' ?>>
         <option value="">Experiments</option>
         <?php foreach ($experiments as $exp): ?>
           <?php $exp = (string)$exp; ?>
@@ -71,8 +71,8 @@ $formClass = $filtersVariant === 'side' ? 'filters filters-panel' : 'filters fil
 
     <div class="panel-block">
       <h2 class="panel-heading">Dates From–To</h2>
-      <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" onchange="this.form.submit()" <?= $dateColumnMissing ? 'disabled' : '' ?>>
-      <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" onchange="this.form.submit()" <?= $dateColumnMissing ? 'disabled' : '' ?>>
+      <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
+      <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
     </div>
 
     <?php if ($filtersActive): ?>
@@ -132,7 +132,7 @@ $formClass = $filtersVariant === 'side' ? 'filters filters-panel' : 'filters fil
         <h2 class="panel-heading">Filters</h2>
       </div>
       <div class="top-nav-row top-nav-type-exp">
-        <select name="type" aria-label="Type" onchange="this.form.submit()">
+        <select name="type" aria-label="Type" data-autosubmit>
           <option value="">Run Types</option>
           <?php foreach ($types as $t): ?>
             <?php
@@ -144,7 +144,7 @@ $formClass = $filtersVariant === 'side' ? 'filters filters-panel' : 'filters fil
             </option>
           <?php endforeach; ?>
         </select>
-        <select name="experiment" aria-label="Experiment" onchange="this.form.submit()" <?= $experimentColumnMissing ? 'disabled' : '' ?>>
+        <select name="experiment" aria-label="Experiment" data-autosubmit <?= $experimentColumnMissing ? 'disabled' : '' ?>>
           <option value="">Experiments</option>
           <?php foreach ($experiments as $exp): ?>
             <?php $exp = (string)$exp; ?>
@@ -162,10 +162,10 @@ $formClass = $filtersVariant === 'side' ? 'filters filters-panel' : 'filters fil
         <h2 class="panel-heading">Dates From–To</h2>
       </div>
       <div class="top-nav-row">
-        <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" onchange="this.form.submit()" <?= $dateColumnMissing ? 'disabled' : '' ?>>
+        <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
       </div>
       <div class="top-nav-row">
-        <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" onchange="this.form.submit()" <?= $dateColumnMissing ? 'disabled' : '' ?>>
+        <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
       </div>
     </div>
   <?php endif; ?>

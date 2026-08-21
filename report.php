@@ -77,5 +77,6 @@ $pageTitle = $siteTitle . ' — Report';
   <?php require __DIR__ . '/includes/report_results.php'; ?>
 
 </div>
+<script src="assets/site.js" defer></script>
 </body>
 </html>

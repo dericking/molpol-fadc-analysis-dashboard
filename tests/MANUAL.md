@@ -37,7 +37,8 @@ one-off manual `ALTER` against a shared long-lived volume without restore.
 - No committed load-test harness; a one-off 20 k-run curl timing lives
   under **Scale snapshot** in `README.md` (DB restored afterward).
 - Production host `.htaccess` effectiveness depends on AllowOverride (see
-  `.htaccess` header and export `--url` probes).
+  `.htaccess` header and export `--url` probes). Confirm CSP shows
+  `script-src 'self'` (no `unsafe-inline`) when headers are live.
 - Analysis classifier vs Don’s names may still leave some fields in Other —
   that is layout work, not covered as a “must be empty Other” assertion.
 
