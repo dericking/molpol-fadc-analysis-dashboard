@@ -273,7 +273,7 @@ Index cards/tables, Run/Group Info, Report/CSV
         <p>When experimenting locally (not Don’s production script):</p>
         <ul>
           <li>Edit <code>docker/init/01_schema.sql</code> (and seed if needed). Recreate the container volume when the DDL changes.</li>
-          <li>Do <strong>not</strong> treat a local schema tweak as applying to the schema owner’s source script without a separate proposed-SQL handoff.</li>
+          <li>Do <strong>not</strong> treat a local schema tweak as applying to the schema owner’s source script — coordinate with them (chat / review / their script) before anything leaves this Docker test DB.</li>
           <li>Comment-only display tweaks can be a standalone <code>ALTER TABLE … MODIFY COLUMN</code> against the test DB without a full reseed.</li>
         </ul>
 
