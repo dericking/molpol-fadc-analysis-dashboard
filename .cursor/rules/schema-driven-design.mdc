@@ -13,7 +13,8 @@ gracefully to a schema change, not break.**
   with their `COLUMN_COMMENT` as the label.
 - Column *grouping* is not in the schema. Rules live in
   `includes/layouts/layout_sections.php`; thin `classify_*_column()` wrappers
-  in `render_helpers.php` apply them (`column-classifiers.mdc`). Unmatched
+  in `helpers_classify.php` (via `render_helpers.php`) apply them
+  (`column-classifiers.mdc`). Unmatched
   columns must **never silently vanish** — they fall into `'Other'` (sorted
   last) via `group_columns_by_section()`.
 - Always apply that table’s `exclude` list **before** grouping (PK,

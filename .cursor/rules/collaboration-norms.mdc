@@ -8,8 +8,9 @@ alwaysApply: true
 - **The live schema is owned outside this site.** Renames, type changes, and
   data-removing migrations are proposals for the schema owner — not edits to
   apply to their source script unprompted. The Docker test schema
-  (`docker/init/01_schema.sql`) can be experimented with freely; a separate
-  proposed-SQL handoff file is the artifact for asking them to change something.
+  (`docker/init/01_schema.sql`) can be experimented with freely. Ask the
+  schema owner via normal coordination (chat / review / their script); a
+  dedicated proposed-SQL handoff file in this repo is not required.
 - **Comment-only changes** (trimming a `COLUMN_COMMENT` for display) can be a
   standalone `ALTER TABLE ... MODIFY COLUMN` against a local test container
   without `down -v` and a full reseed.

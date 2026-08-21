@@ -1,6 +1,6 @@
 ---
 description: Section layouts — classifiers, exclude, featured, and named card-layout bands
-globs: includes/render_helpers.php,includes/layouts/layout_sections.php
+globs: includes/helpers_classify.php,includes/render_helpers.php,includes/layouts/layout_sections.php
 alwaysApply: false
 ---
 

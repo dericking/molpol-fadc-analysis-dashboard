@@ -17,8 +17,9 @@ alwaysApply: true
   table’s `exclude` from `includes/layouts/layout_sections.php` before
   `group_columns_by_section()` (PK, `last_updated`, fields rendered elsewhere).
   Forgetting to exclude the PK can leave a near-empty Other card.
-- **Shared-file edits** (`render_helpers.php`, `schema.php`, `style.css`,
-  `includes/layouts/layout_*.php`, `descriptions_errors.php`): apply the
-  complete intended state — partial edits can omit a section with no PHP error.
+- **Shared-file edits** (`render_helpers.php`, `helpers_*.php`, `schema.php`,
+  `style.css`, `includes/layouts/layout_*.php`, `descriptions_errors.php`):
+  apply the complete intended state — partial edits can omit a section with
+  no PHP error.
 - **Regex classifier order matters.** More specific patterns before broader
   ones; first match wins.

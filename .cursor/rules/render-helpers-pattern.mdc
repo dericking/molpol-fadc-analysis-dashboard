@@ -1,12 +1,13 @@
 ---
 description: Shared render helpers, section layouts, list cards/tables, and plots
-globs: includes/render_helpers.php,includes/layouts/**/*.php,includes/index_query.php,detail_runs.php,detail_epics.php,detail_daq.php,index.php,detail_groups.php,report.php,report_advanced.php
+globs: includes/render_helpers.php,includes/helpers_*.php,includes/layouts/**/*.php,includes/index_query.php,detail_runs.php,detail_epics.php,detail_daq.php,index.php,detail_groups.php,report.php,report_advanced.php
 alwaysApply: false
 ---
 
 # The Render-Helpers Pattern
 
-Shared rendering lives in `includes/render_helpers.php`. Prefer those helpers
+Shared rendering is loaded via `includes/render_helpers.php` (barrel for
+`helpers_{datetime,classify,render,plots,report}.php`). Prefer those helpers
 over one-off loops in page files. Pages `require_once` `includes/bootstrap.php`
 once (`$config`, `$pdo`).
 

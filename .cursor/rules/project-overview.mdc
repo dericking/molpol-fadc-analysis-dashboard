@@ -30,7 +30,12 @@ includes/bootstrap.php           — config + dbconnect + schema + render_helper
 includes/schema.php              — INFORMATION_SCHEMA helpers only
 includes/layouts/                — Caretaker presentation (touch these for UI)
   layout_{navbar,cards,tables,sections,run_summary,lookups,report}.php
-includes/render_helpers.php      — Classify / group / render / require_* helpers
+includes/render_helpers.php      — Barrel: require_once helpers_*.php
+includes/helpers_datetime.php    — Date/SQL stamp helpers
+includes/helpers_classify.php    — Classifiers, section layouts, load_section_view
+includes/helpers_render.php      — Cards/tables/status/lookups/navbar/require_*
+includes/helpers_plots.php       — Plot dirs + render_analysis_plots
+includes/helpers_report.php      — Report catalog / table / CSV
 includes/descriptions_errors.php — Status-help catalog (help_errors.php)
 includes/index_*.php             — Index filters / query / results
 includes/report_*.php            — Report filters / query / results
