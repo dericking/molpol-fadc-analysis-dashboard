@@ -24,7 +24,8 @@
  *
  * --- quality_slugs ---
  * Lookup *code* => CSS suffix (quality-tag-{slug}). Not display labels.
- * Unknown codes fall back to strtolower(code) if it is [a-z]+, else pending.
+ * Unknown codes fall back to strtolower(code) if it is [a-z]+, else unknown
+ * (not pending — empty/unset still maps to pending in quality_slug()).
  *
  * After editing, reload the page; no rebuild step.
  * =============================================================================

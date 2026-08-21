@@ -179,8 +179,10 @@ function quality_slug(?string $quality): string
     if (isset($slugs[$upper]) && is_string($slugs[$upper]) && $slugs[$upper] !== '') {
         return $slugs[$upper];
     }
+    // Letter-only codes may already match a .quality-tag-{slug} rule; anything
+    // else is unrecognized — distinct from empty/unset ("pending").
     $slug = strtolower($raw);
-    return preg_match('/^[a-z]+$/', $slug) ? $slug : 'pending';
+    return preg_match('/^[a-z]+$/', $slug) ? $slug : 'unknown';
 }
 
 function format_group_label($groupId): string
@@ -485,7 +487,9 @@ function load_section_view(PDO $pdo, string $layoutKey, $id): array
  */
 function require_positive_int_query(string $param): int
 {
-    $value = filter_input(INPUT_GET, $param, FILTER_VALIDATE_INT);
+    $value = filter_input(INPUT_GET, $param, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => 1],
+    ]);
     if ($value === null || $value === false) {
         http_response_code(400);
         $label = htmlspecialchars($param);

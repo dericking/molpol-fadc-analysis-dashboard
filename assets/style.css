@@ -28,11 +28,13 @@
   --quality-suspect: #c08a2e;
   --quality-pending: #767268;
   --quality-junk: #6e3d4a;
+  --quality-unknown: #5a5a5a;
   --quality-good-bg: #dce8e1;
   --quality-bad-bg: #f0ddd7;
   --quality-suspect-bg: #f3e8d2;
   --quality-pending-bg: #e4e2dc;
   --quality-junk-bg: #ead9de;
+  --quality-unknown-bg: #d8d8d8;
 
   --font-display: 'Iowan Old Style', Georgia, serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, monospace;
@@ -1160,18 +1162,21 @@ form.filters.filters-panel .panel-clear-btn:hover {
 .quality-tag-suspect      { background-color: var(--quality-suspect-bg); }
 .quality-tag-pending { background-color: var(--quality-pending-bg); }
 .quality-tag-junk         { background-color: var(--quality-junk-bg); }
+.quality-tag-unknown      { background-color: var(--quality-unknown-bg); }
 
 .quality-good         { color: var(--quality-good); }
 .quality-bad           { color: var(--quality-bad); }
 .quality-suspect      { color: var(--quality-suspect); }
 .quality-pending      { color: var(--quality-pending); }
 .quality-junk         { color: var(--quality-junk); }
+.quality-unknown      { color: var(--quality-unknown); }
 
 .quality-border-good         { border-left-color: var(--quality-good) !important; }
 .quality-border-bad           { border-left-color: var(--quality-bad) !important; }
 .quality-border-suspect      { border-left-color: var(--quality-suspect) !important; }
 .quality-border-pending      { border-left-color: var(--quality-pending) !important; }
 .quality-border-junk         { border-left-color: var(--quality-junk) !important; }
+.quality-border-unknown      { border-left-color: var(--quality-unknown) !important; }
 
 /* Explicit row-based card layout — see render_card_row() / render_featured_row()
    in includes/render_helpers.php. Shared by detail_runs.php, detail_epics.php,
