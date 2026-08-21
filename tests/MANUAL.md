@@ -34,7 +34,8 @@ one-off manual `ALTER` against a shared long-lived volume without restore.
 ## Gaps / not claimed
 
 - No full browser UI checklist (screenshots, a11y).
-- No load test / 20k-run baseline (P2-3).
+- No committed load-test harness; a one-off 20 k-run curl timing lives
+  under **Scale snapshot** in `README.md` (DB restored afterward).
 - Production host `.htaccess` effectiveness depends on AllowOverride (see
   `.htaccess` header and export `--url` probes).
 - Analysis classifier vs Don’s names may still leave some fields in Other —
