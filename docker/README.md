@@ -28,6 +28,11 @@ project-root/
 ├── report_advanced.php       Advanced column-picker report
 ├── help_howto.php            Caretaker how-to
 ├── help_errors.php           Status-message help
+├── tests/                    Smoke / unit / schema-drift (not shipped to web)
+│   ├── smoke.sh
+│   ├── run.php
+│   ├── schema_drift.sh
+│   └── MANUAL.md
 ├── README.md                 Site overview (parent of this file)
 ├── assets/
 │   └── style.css

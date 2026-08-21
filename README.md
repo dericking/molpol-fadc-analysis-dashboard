@@ -136,6 +136,22 @@ index type/date column missing, `run_group` missing on the group page.
 
 ---
 
+## Local verification
+
+With the Docker stack up and seeded (see `docker/README.md`):
+
+```bash
+php tests/run.php                                 # pure helpers, no Docker
+./tests/smoke.sh http://127.0.0.1:8090            # HTTP status + no leaked fatals
+./tests/schema_drift.sh http://127.0.0.1:8090     # ALTER TABLE degrade checks (+ reseed)
+```
+
+Notes and what was exercised by hand: `tests/MANUAL.md`.
+Default smoke/drift fixture run is **20000** / group **1** (junk seed).
+Override with `SMOKE_RUN` / `SMOKE_GROUP` if needed.
+
+---
+
 ## Deploy / setup
 
 Single web server: PHP with PDO MySQL + the MariaDB this site reads.
@@ -206,6 +222,10 @@ explicit filesystem base.
 `docker/` is a **test-only** MariaDB + Apache/PHP stack, plus
 `docker/seed_junk_data.php` (quick fake runs). It is not how production
 is meant to run. See `docker/README.md`.
+
+Automated checks (after the stack is up and seeded): `php tests/run.php`,
+`./tests/smoke.sh`, `./tests/schema_drift.sh` — see **Local verification**
+above and `tests/MANUAL.md`.
 
 ---
 
