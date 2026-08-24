@@ -191,7 +191,10 @@ load-test script in the tree).
 | `/help_howto.php` | 0.001 | 42 k |
 
 On that laptop Docker path, capped browse/report stayed under ~50 ms at
-20 k runs. Re-check if production row counts or joins differ a lot.
+20 k runs. Re-check if production row counts or joins differ a lot. The 
+reality is that we'll never pull 20,000 runs of data or even 2,000 runs 
+in a run report; I just wanted to make sure that there wasn't something 
+funky about the behavior. 
 
 ---
 
