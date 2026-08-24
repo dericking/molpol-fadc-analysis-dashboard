@@ -20,6 +20,7 @@ build step.
 
 Screenshots from the local Docker UI (same layout as production).
 Displayed at **720px** wide so they fit a GitHub README column.
+Generated seed junk data for testing database shown (not actual data). 
 
 ### Browse (index)
 
