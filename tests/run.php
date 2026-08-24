@@ -86,6 +86,14 @@ assert_eq('good', quality_slug('GOOD'), 'quality GOOD → good');
 assert_eq('unknown', quality_slug('NOT_GOOD'), 'quality NOT_GOOD → unknown');
 assert_eq('unknown', quality_slug('weird!'), 'quality weird! → unknown');
 
+// --- soft_wrap_commas / fmt_value (display wrap for CSV-like strings) -------
+assert_eq('1, 2, 3', soft_wrap_commas('1,2,3'), 'commas get spaces');
+assert_eq('1, 2, 3', soft_wrap_commas('1, 2,3'), 'mixed spacing normalized');
+assert_eq('1, 2, 3', soft_wrap_commas('1,  2,   3'), 'extra spaces collapsed');
+assert_eq('1, 2, 3', fmt_value('1,2,3'), 'fmt_value wraps commas');
+assert_eq('—', fmt_value(null), 'fmt_value null');
+assert_eq('—', fmt_value(''), 'fmt_value empty');
+
 // --- classifiers (order matters) -------------------------------------------
 assert_eq(
     'Pedestal & Channel Thresholds',

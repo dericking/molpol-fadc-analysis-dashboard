@@ -277,12 +277,21 @@ function render_featured_row(string $title, array $columns, ?array $row): void
     echo '</div>';
 }
 
+/**
+ * Insert a space after each comma so long CSV-like strings (masks, ped lists)
+ * can wrap in the UI. Collapses ",  " → ", ". Display-only — not for CSV.
+ */
+function soft_wrap_commas(string $text): string
+{
+    return preg_replace('/,\s*/', ', ', $text) ?? $text;
+}
+
 function fmt_value($value): string
 {
     if ($value === null || $value === '') {
         return '—';
     }
-    return htmlspecialchars((string)$value);
+    return htmlspecialchars(soft_wrap_commas((string)$value));
 }
 
 /**
@@ -497,7 +506,7 @@ function summary_cell_value_html(array $cell, array $data, array $options = []):
             } else {
                 $field = (string)($cell['field'] ?? '');
                 $label = lookup_label_for_field($field, $raw);
-                $text = $label !== '' ? $label : (string)$raw;
+                $text = $label !== '' ? $label : soft_wrap_commas((string)$raw);
             }
             return htmlspecialchars($text);
 
@@ -550,7 +559,7 @@ function summary_cell_value_html(array $cell, array $data, array $options = []):
             if ($raw === null || trim((string)$raw) === '') {
                 return null;
             }
-            return nl2br(htmlspecialchars((string)$raw));
+            return nl2br(htmlspecialchars(soft_wrap_commas((string)$raw)));
 
         default:
             return null;
@@ -717,7 +726,7 @@ function list_cell_html(array $cell, array $data): ?string
                 $text = '—';
             } else {
                 $label = lookup_label_for_field($field, $raw);
-                $text = $label !== '' ? $label : (string)$raw;
+                $text = $label !== '' ? $label : soft_wrap_commas((string)$raw);
             }
             return '<span' . $class . '>' . htmlspecialchars($text) . '</span>';
 
