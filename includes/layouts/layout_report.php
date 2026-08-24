@@ -114,7 +114,7 @@ return [
                         ['field' => 'run_start',      'header' => 'Start',      'source' => 'run'],
                         ['field' => 'run_end',        'header' => 'End',        'source' => 'run'],
                         ['field' => 'run_quality',    'header' => 'Run Quality','source' => 'run', 'kind' => 'quality'],
-                        ['field' => 'run_comment',    'header' => 'Comment',    'source' => 'run'],
+                        ['field' => 'comment',        'header' => 'Comment',    'source' => 'run'],
                         ['field' => 'run_experiment', 'header' => 'Experiment', 'source' => 'run'],
                     ],
                 ],
@@ -123,11 +123,11 @@ return [
                 [
                     'title' => 'EPICS Laser & Wien',
                     'columns' => [
-                        ['field' => 'epics_ihwp',        'header' => 'iHWP',        'source' => 'epics'],
-                        ['field' => 'epics_rhwp',        'header' => 'rHWP',        'source' => 'epics'],
-                        ['field' => 'epics_vwien',      'header' => 'V Wien',      'source' => 'epics'],
-                        ['field' => 'epics_hwien',      'header' => 'H Wien',      'source' => 'epics'],
-                        ['field' => 'epics_sol',        'header' => 'Sol',         'source' => 'epics'],
+                        ['field' => 'epics_ihwp',         'header' => 'iHWP',           'source' => 'epics'],
+                        ['field' => 'epics_rhwp',         'header' => 'rHWP',           'source' => 'epics'],
+                        ['field' => 'epics_vwien_angle',  'header' => 'V Wien angle',   'source' => 'epics'],
+                        ['field' => 'epics_hwien_angle',  'header' => 'H Wien angle',   'source' => 'epics'],
+                        ['field' => 'epics_sol_phi_fg',   'header' => 'Sol angle',      'source' => 'epics'],
                     ],
                 ],
                 [

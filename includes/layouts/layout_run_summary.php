@@ -50,7 +50,7 @@ return [
             ],
         ],
         'footer' => [
-            ['kind' => 'comment', 'field' => 'run_comment', 'label' => 'Comment'],
+            ['kind' => 'comment', 'field' => 'comment', 'label' => 'Comment'],
         ],
     ],
     'group' => [
