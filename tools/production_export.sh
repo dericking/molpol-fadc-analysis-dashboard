@@ -54,6 +54,10 @@ SITE_PATHS=(
     includes
     tools/init_site.sh
     tools/index.html
+    tools/db_probe.php
+    tools/php54_lint.php
+    tools/list_runs.php
+    tools/debug_home.php
 )
 
 APPLY=0
@@ -119,7 +123,19 @@ STAGE="$(mktemp -d)" || die "cannot create temp directory"
 cleanup() { rm -rf "$STAGE"; }
 trap cleanup EXIT
 
-git archive HEAD -- "${SITE_PATHS[@]}" | tar -x -C "$STAGE" \
+# Skip allowlist entries that are not in this commit (php54-debug has no
+# .htaccess). git archive fails the whole export if any pathspec is missing.
+ARCHIVE_PATHS=()
+for p in "${SITE_PATHS[@]}"; do
+    if git cat-file -e "HEAD:$p" 2>/dev/null; then
+        ARCHIVE_PATHS+=("$p")
+    else
+        echo "  skip  $p (not in HEAD)"
+    fi
+done
+[ "${#ARCHIVE_PATHS[@]}" -gt 0 ] || die "no SITE_PATHS exist at HEAD"
+
+git archive HEAD -- "${ARCHIVE_PATHS[@]}" | tar -x -C "$STAGE" \
     || die "git archive failed — check that every SITE_PATHS entry exists at HEAD"
 
 staged_count="$(find "$STAGE" -type f | wc -l)"
