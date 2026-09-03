@@ -287,7 +287,8 @@ function render_field_list($columns, $row, $skipColumn = 'run_number'){
         render_status_message('empty_table_row');
         return;
     }
-    $colNameSet = array_flip(array_column($columns, 'name'));
+    $colNameSet = array();
+    foreach ($columns as $_col) { $colNameSet[$_col['name']] = true; }
     echo '<dl class="fields">';
     foreach ($columns as $col) {
         $name = $col['name'];
