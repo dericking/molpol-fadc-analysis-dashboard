@@ -50,7 +50,7 @@ $pageTitle = $siteTitle . ' — Report';
         </div>
       </div>
       <?php
-        $primaryRow = isset($availableColumnRows[0]) ? availableColumnRows[0] : [];
+        $primaryRow = isset($availableColumnRows[0]) ? $availableColumnRows[0] : array();
         $extraRows = array_slice($availableColumnRows, 1);
       ?>
       <?php if ($primaryRow !== []): ?>

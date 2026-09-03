@@ -32,7 +32,7 @@ $filterExperiment = trim((string)(isset($_GET['experiment']) ? $_GET['experiment
 $filterDateFrom = parse_ymd_query_param(isset($_GET['from']) ? $_GET['from'] : '');
 $filterDateTo   = parse_ymd_query_param(isset($_GET['to']) ? $_GET['to'] : '');
 if ($filterDateFrom !== null && $filterDateTo !== null && $filterDateFrom > $filterDateTo) {
-    [$filterDateFrom, $filterDateTo] = [$filterDateTo, $filterDateFrom];
+    list($filterDateFrom, $filterDateTo) = array($filterDateTo, $filterDateFrom);
 }
 $runSearch   = trim((string)(isset($_GET['run']) ? $_GET['run'] : ''));
 $groupSearch = trim((string)(isset($_GET['group']) ? $_GET['group'] : ''));
@@ -245,7 +245,7 @@ if ($hasExperimentColumn) {
 $formatRaw = strtolower((string)(isset($_GET['format']) ? $_GET['format'] : ''));
 $format = ($formatRaw === 'csv') ? 'csv' : 'html';
 
-$qs = function ($overrides) use ($defaultView, $selectedFields, $colsExplicit {
+$qs = function ($overrides) use ($defaultView, $selectedFields, $colsExplicit) {
     $base = [
         'view'       => isset($_GET['view']) ? $_GET['view'] : $defaultView,
         'type'       => isset($_GET['type']) ? $_GET['type'] : '',

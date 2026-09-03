@@ -61,7 +61,7 @@ $noEndTimeLabel      = 'ongoing / not recorded';
 $defaultLayout = (isset($config['default_layout']) ? $config['default_layout'] : 'table') === 'cards' ? 'cards' : 'table';
 $listLayout = (isset($_GET['layout']) ? $_GET['layout'] : $defaultLayout) === 'table' ? 'table' : 'cards';
 
-$layoutQs = function ($nextLayout) use ($groupId, $defaultLayout {
+$layoutQs = function ($nextLayout) use ($groupId, $defaultLayout) {
     $params = ['group' => (int)$groupId];
     if ($nextLayout !== $defaultLayout) {
         $params['layout'] = $nextLayout;
