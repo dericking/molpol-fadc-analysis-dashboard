@@ -61,7 +61,7 @@ project-root/
 └── docker/                   Local test stack (this folder)
     ├── docker-compose.yml
     ├── docker-compose.override.yml   (git-ignored; local port remaps)
-    ├── Dockerfile            php:8.1-apache + pdo_mysql
+    ├── Dockerfile            PHP 5.4.45 Apache + pdo_mysql
     ├── seed_junk_data.php    Junk INSERT for UI testing
     ├── README.md             (this file)
     └── init/
@@ -112,7 +112,7 @@ docker compose up -d --build
 | Service | Role | Host access |
 |---------|------|-------------|
 | `site-db-test` | MariaDB 11, schema + SELECT-only user | `127.0.0.1:3307` → 3306 |
-| `site-web` | Apache + PHP 8.1, site DocumentRoot | [http://localhost:8080](http://localhost:8080) |
+| `site-web` | Apache + PHP 5.4.45, site DocumentRoot | [http://localhost:8080](http://localhost:8080) |
 
 Inside the compose network the web container talks to the DB as host
 `site-db-test` port `3306` (set via `SITE_DB_*` in `docker-compose.yml`).

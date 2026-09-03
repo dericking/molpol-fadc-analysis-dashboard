@@ -12,7 +12,7 @@
 /**
  * Load section layouts / classifiers (cached per request).
  */
-function get_section_layouts(): array
+function get_section_layouts()
 {
     static $layouts = null;
     if ($layouts === null) {
@@ -27,15 +27,15 @@ function get_section_layouts(): array
  * match regex  — preg_match(pattern, $name)
  * First match wins; otherwise 'Other'.
  */
-function classify_column_from_rules(string $name, array $rules): string
+function classify_column_from_rules($name, $rules)
 {
     foreach ($rules as $rule) {
         if (!is_array($rule) || !isset($rule['section'])) {
             continue;
         }
-        $match = $rule['match'] ?? 'prefix';
+        $match = isset($rule['match']) ? $rule['match'] : 'prefix';
         if ($match === 'prefix') {
-            $key = $rule['key'] ?? null;
+            $key = isset($rule['key']) ? $rule['key'] : null;
             if ($key === null || $key === '') {
                 continue;
             }
@@ -44,7 +44,7 @@ function classify_column_from_rules(string $name, array $rules): string
                 return (string)$rule['section'];
             }
         } elseif ($match === 'regex') {
-            $pattern = $rule['pattern'] ?? null;
+            $pattern = isset($rule['pattern']) ? $rule['pattern'] : null;
             if (!is_string($pattern) || $pattern === '') {
                 continue;
             }
@@ -56,27 +56,31 @@ function classify_column_from_rules(string $name, array $rules): string
     return 'Other';
 }
 
-function classify_daq_column(string $name): string
+function classify_daq_column($name)
 {
-    $rules = get_section_layouts()['daq']['classifier'] ?? [];
+    $layouts = get_section_layouts();
+    $rules = isset($layouts['daq']['classifier']) ? $layouts['daq']['classifier'] : array();
     return classify_column_from_rules($name, $rules);
 }
 
-function classify_analysis_column(string $name): string
+function classify_analysis_column($name)
 {
-    $rules = get_section_layouts()['analysis']['classifier'] ?? [];
+    $layouts = get_section_layouts();
+    $rules = isset($layouts['analysis']['classifier']) ? $layouts['analysis']['classifier'] : array();
     return classify_column_from_rules($name, $rules);
 }
 
-function classify_grouped_analysis_column(string $name): string
+function classify_grouped_analysis_column($name)
 {
-    $rules = get_section_layouts()['grouped_analysis']['classifier'] ?? [];
+    $layouts = get_section_layouts();
+    $rules = isset($layouts['grouped_analysis']['classifier']) ? $layouts['grouped_analysis']['classifier'] : array();
     return classify_column_from_rules($name, $rules);
 }
 
-function classify_epics_column(string $name): string
+function classify_epics_column($name)
 {
-    $rules = get_section_layouts()['epics']['classifier'] ?? [];
+    $layouts = get_section_layouts();
+    $rules = isset($layouts['epics']['classifier']) ? $layouts['epics']['classifier'] : array();
     return classify_column_from_rules($name, $rules);
 }
 
@@ -93,11 +97,11 @@ function classify_epics_column(string $name): string
  *   layouts: array<string, list<array>>
  * }
  */
-function apply_section_layout(array $sections, array $layoutConfig): array
+function apply_section_layout($sections, $layoutConfig)
 {
     // Optional: copy named columns into an additional section (still kept in home section).
     if (!empty($layoutConfig['duplicate_into']) && is_array($layoutConfig['duplicate_into'])) {
-        $byName = [];
+        $byName = array();
         foreach ($sections as $cols) {
             foreach ($cols as $col) {
                 $byName[$col['name']] = $col;
@@ -115,35 +119,35 @@ function apply_section_layout(array $sections, array $layoutConfig): array
         }
     }
 
-    $featuredRaw = $layoutConfig['featured'] ?? null;
+    $featuredRaw = isset($layoutConfig['featured']) ? $layoutConfig['featured'] : null;
     if (is_string($featuredRaw) && $featuredRaw !== '') {
-        $featuredNames = [$featuredRaw];
+        $featuredNames = array($featuredRaw);
     } elseif (is_array($featuredRaw)) {
-        $featuredNames = [];
+        $featuredNames = array();
         foreach ($featuredRaw as $name) {
             if (is_string($name) && $name !== '') {
                 $featuredNames[] = $name;
             }
         }
     } else {
-        $featuredNames = [];
+        $featuredNames = array();
     }
 
-    $featuredRows = [];
+    $featuredRows = array();
     foreach ($featuredNames as $featuredName) {
         if (!isset($sections[$featuredName])) {
             continue;
         }
-        $featuredRows[] = [
+        $featuredRows[] = array(
             'title'   => $featuredName,
             'columns' => $sections[$featuredName],
-        ];
+        );
         unset($sections[$featuredName]);
     }
 
-    $layoutsRaw = $layoutConfig['layouts'] ?? [];
-    $layouts = [];
-    $layoutErrors = [];
+    $layoutsRaw = isset($layoutConfig['layouts']) ? $layoutConfig['layouts'] : array();
+    $layouts = array();
+    $layoutErrors = array();
     if (is_array($layoutsRaw)) {
         foreach ($layoutsRaw as $bandName => $rows) {
             if (!is_string($bandName) || $bandName === '' || $bandName === 'unallocated') {
@@ -151,15 +155,15 @@ function apply_section_layout(array $sections, array $layoutConfig): array
                 continue;
             }
             if (!is_array($rows)) {
-                $layoutErrors[] = [
+                $layoutErrors[] = array(
                     'key'     => 'layout_band_invalid',
                     'summary' => "WARNING: layouts.{$bandName} must be an array of rows "
                         . "(each row an array of section titles), e.g. [ ['Section A', 'Section B'] ].",
-                ];
-                $layouts[$bandName] = [];
+                );
+                $layouts[$bandName] = array();
                 continue;
             }
-            $validRows = [];
+            $validRows = array();
             $bandMalformed = false;
             foreach ($rows as $row) {
                 if (is_array($row)) {
@@ -169,18 +173,18 @@ function apply_section_layout(array $sections, array $layoutConfig): array
                 }
             }
             if ($bandMalformed) {
-                $layoutErrors[] = [
+                $layoutErrors[] = array(
                     'key'     => 'layout_flat_list',
                     'summary' => "WARNING: layouts.{$bandName} has a flat list of section titles. "
                         . "Use rows-of-rows, e.g. [ ['Section A', 'Section B'] ], "
                         . "not [ 'Section A', 'Section B' ].",
-                ];
+                );
             }
             $layouts[$bandName] = $validRows;
         }
     }
 
-    $allRows = [];
+    $allRows = array();
     foreach ($layouts as $rows) {
         foreach ($rows as $row) {
             if (is_array($row)) {
@@ -188,15 +192,21 @@ function apply_section_layout(array $sections, array $layoutConfig): array
             }
         }
     }
-    // Only spread real row arrays — never strings (avoids PHP TypeError).
-    $placedKeys = $allRows !== [] ? array_merge([], ...$allRows) : [];
-    $placedKeys = array_values(array_filter($placedKeys, fn($k) => $k !== null));
+  $placedKeys = array();
+    if ($allRows !== array()) {
+        foreach ($allRows as $rowKeys) {
+            $placedKeys = array_merge($placedKeys, $rowKeys);
+        }
+    }
+    $placedKeys = array_values(array_filter($placedKeys, function ($k) {
+        return $k !== null;
+    }));
     $leftoverKeys = array_values(array_diff(array_keys($sections), $placedKeys));
 
     // Caretaker hide-list: only affects the unallocated band. Sections still
     // listed in featured / layouts render there as usual.
-    $ignoreRaw = $layoutConfig['ignore_sections'] ?? [];
-    $ignore = [];
+    $ignoreRaw = isset($layoutConfig['ignore_sections']) ? $layoutConfig['ignore_sections'] : array();
+    $ignore = array();
     if (is_array($ignoreRaw)) {
         foreach ($ignoreRaw as $name) {
             if (is_string($name) && $name !== '') {
@@ -207,7 +217,9 @@ function apply_section_layout(array $sections, array $layoutConfig): array
     if ($ignore) {
         $leftoverKeys = array_values(array_filter(
             $leftoverKeys,
-            fn($k) => !isset($ignore[$k])
+            function ($k) use ($ignore) {
+                return !isset($ignore[$k]);
+            }
         ));
     }
 
@@ -216,41 +228,41 @@ function apply_section_layout(array $sections, array $layoutConfig): array
         $layouts['unallocated'] = array_chunk($leftoverKeys, 4);
     }
 
-    return [
+    return array(
         'featured_rows'  => $featuredRows,
         'sections'       => $sections,
         'layouts'        => $layouts,
         'layout_errors'  => $layoutErrors,
-    ];
+    );
 }
 
 /**
  * Map section_layouts keys to table / PK / classifier for load_section_view().
  */
-function section_view_table_map(): array
+function section_view_table_map()
 {
-    return [
-        'analysis' => [
+    return array(
+        'analysis' => array(
             'table'      => 'Analysis',
             'pk'         => 'run_number',
             'classifier' => 'classify_analysis_column',
-        ],
-        'daq' => [
+        ),
+        'daq' => array(
             'table'      => 'DAQ_config',
             'pk'         => 'run_number',
             'classifier' => 'classify_daq_column',
-        ],
-        'epics' => [
+        ),
+        'epics' => array(
             'table'      => 'EPICS_data',
             'pk'         => 'run_number',
             'classifier' => 'classify_epics_column',
-        ],
-        'grouped_analysis' => [
+        ),
+        'grouped_analysis' => array(
             'table'      => 'Grouped_Analysis',
             'pk'         => 'group_number',
             'classifier' => 'classify_grouped_analysis_column',
-        ],
-    ];
+        ),
+    );
 }
 
 /**
@@ -264,32 +276,35 @@ function section_view_table_map(): array
  *   last_updated: mixed
  * }
  */
-function load_section_view(PDO $pdo, string $layoutKey, $id): array
+function load_section_view(PDO $pdo, $layoutKey, $id)
 {
     $map = section_view_table_map();
     if (!isset($map[$layoutKey])) {
         throw new InvalidArgumentException("Unknown section layout key: {$layoutKey}");
     }
     $meta = $map[$layoutKey];
-    $sectionCfg = get_section_layouts()[$layoutKey] ?? [];
-    $exclude = $sectionCfg['exclude'] ?? [$meta['pk'], 'last_updated'];
+    $layouts = get_section_layouts();
+    $sectionCfg = isset($layouts[$layoutKey]) ? $layouts[$layoutKey] : array();
+    $exclude = isset($sectionCfg['exclude']) ? $sectionCfg['exclude'] : array($meta['pk'], 'last_updated');
 
     $row = fetch_row_by_key($pdo, $meta['table'], $meta['pk'], $id);
     $columns = array_values(array_filter(
         get_table_columns($pdo, $meta['table']),
-        fn($col) => !in_array($col['name'], $exclude, true)
+        function ($col) use ($exclude) {
+            return !in_array($col['name'], $exclude, true);
+        }
     ));
     $sections = group_columns_by_section($columns, $meta['classifier']);
     $applied = apply_section_layout($sections, $sectionCfg);
 
-    return [
+    return array(
         'row'            => $row,
         'sections'       => $applied['sections'],
         'featured_rows'  => $applied['featured_rows'],
         'layouts'        => $applied['layouts'],
-        'layout_errors'  => $applied['layout_errors'] ?? [],
-        'last_updated'   => $row['last_updated'] ?? null,
-    ];
+        'layout_errors'  => isset($applied['layout_errors']) ? $applied['layout_errors'] : array(),
+        'last_updated'   => isset($row['last_updated']) ? $row['last_updated'] : null,
+    );
 }
 
 /**
@@ -298,9 +313,9 @@ function load_section_view(PDO $pdo, string $layoutKey, $id): array
  * if present — and simply absent from the result, not rendered as an empty
  * section, if every column matched a real group.
  */
-function group_columns_by_section(array $columns, callable $classifier): array
+function group_columns_by_section($columns, $classifier)
 {
-    $sections = [];
+    $sections = array();
     foreach ($columns as $col) {
         $section = $classifier($col['name']);
         $sections[$section][] = $col;

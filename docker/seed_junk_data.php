@@ -53,33 +53,56 @@ $pdo = new PDO(
 
 // Columns that should never get a generated value: primary key (handled
 // explicitly per run) and any auto-managed timestamp.
-const SKIP_COLUMNS = ['run_number', 'last_updated'];
+const SKIP_COLUMNS = array('run_number', 'last_updated');
 
-function rand_float(float $lo, float $hi): float
+/**
+ * PHP 5.4-safe random_int (test seed only).
+ */
+function seed_random_int($min, $max)
 {
+    return mt_rand((int)$min, (int)$max);
+}
+
+/**
+ * PHP 5.4-safe random_bytes (test seed only).
+ */
+function seed_random_bytes($length)
+{
+    $length = (int)$length;
+    if ($length <= 0) {
+        return '';
+    }
+    if (function_exists('openssl_random_pseudo_bytes')) {
+        return openssl_random_pseudo_bytes($length);
+    }
+    $bytes = '';
+    for ($i = 0; $i < $length; $i++) {
+        $bytes .= chr(mt_rand(0, 255));
+    }
+    return $bytes;
+}
+
+function rand_float($lo, $hi){
     return $lo + (mt_rand(0, 1000000) / 1000000) * ($hi - $lo);
 }
 
 /** Positive absolute error = |value| * uniform(pctLo, pctHi) / 100. */
-function pct_of(float $value, float $pctLo, float $pctHi): float
-{
+function pct_of($value, $pctLo, $pctHi){
     return abs($value) * rand_float($pctLo, $pctHi) / 100.0;
 }
 
 /** Positive value near $nominal with ±$pctPercent relative scatter. */
-function jitter(float $nominal, float $pctPercent): float
-{
+function jitter($nominal, $pctPercent){
     $frac = $pctPercent / 100.0;
     return $nominal * (1.0 + rand_float(-$frac, $frac));
 }
 
 /** Linux `date` style string, matching production Run_info VARCHAR stamps. */
-function format_linux_date(int $ts): string
-{
+function format_linux_date($ts){
     return date('D M j H:i:s T Y', $ts);
 }
 
-function random_value_for_column(array $col)
+function random_value_for_column($col)
 {
     $type   = $col['type'];
     $ctype  = $col['column_type'];
@@ -127,35 +150,37 @@ function random_value_for_column(array $col)
 
     // Linux-'date'-style free-text start/end timestamps (VARCHAR, not DATETIME)
     if (in_array($name, ['run_start', 'run_end'], true)) {
-        return format_linux_date(random_int(strtotime('2026-01-01'), strtotime('2026-12-31')));
+        return format_linux_date(seed_random_int(strtotime('2026-01-01'), strtotime('2026-12-31')));
     }
 
     if ($type === 'datetime' || $type === 'timestamp') {
-        return date('Y-m-d H:i:s', random_int(strtotime('2026-01-01'), strtotime('2026-12-31')));
+        return date('Y-m-d H:i:s', seed_random_int(strtotime('2026-01-01'), strtotime('2026-12-31')));
     }
 
     if (in_array($type, ['int', 'smallint', 'mediumint', 'bigint', 'tinyint'], true)) {
         // TINYINT(1) is conventionally boolean-ish in this schema
-        if ($type === 'tinyint' && str_contains($ctype, '(1)')) {
-            return random_int(0, 1);
+        if ($type === 'tinyint' && (strpos($ctype, '(1)') !== false)) {
+            return seed_random_int(0, 1);
         }
         // Pedestal / TET maxped are 0–1023; nsat is 1–4 when set.
         if (preg_match('/maxped$/i', $name)) {
-            return random_int(40, 120);
+            return seed_random_int(40, 120);
         }
         if (preg_match('/nsat$/i', $name)) {
-            return random_int(1, 4);
+            return seed_random_int(1, 4);
         }
         if (preg_match('/npeak$/i', $name)) {
-            return random_int(1, 4);
+            return seed_random_int(1, 4);
         }
-        $unsigned = str_contains($ctype, 'unsigned');
-        $max = match ($type) {
-            'tinyint'  => 120,
-            'smallint' => 5000,
-            default    => 100000,
-        };
-        return $unsigned ? random_int(0, $max) : random_int(-$max, $max);
+        $unsigned = (strpos($ctype, 'unsigned') !== false);
+        if ($type === 'tinyint') {
+            $max = 120;
+        } elseif ($type === 'smallint') {
+            $max = 5000;
+        } else {
+            $max = 100000;
+        }
+        return $unsigned ? seed_random_int(0, $max) : seed_random_int(-$max, $max);
     }
 
     if (in_array($type, ['float', 'double', 'decimal'], true)) {
@@ -176,21 +201,21 @@ function random_value_for_column(array $col)
 
     if (in_array($type, ['varchar', 'char', 'text', 'mediumtext'], true)) {
         if (strcasecmp($name, 'epics_ihwp') === 0) {
-            return random_int(0, 1) ? 'IN' : 'OUT';
+            return seed_random_int(0, 1) ? 'IN' : 'OUT';
         }
         if (preg_match('/^epics_hel_pattern$/i', $name)) {
-            return ['pair', 'quartet', 'octet'][random_int(0, 2)];
+            return ['pair', 'quartet', 'octet'][seed_random_int(0, 2)];
         }
         if (preg_match('/^epics_n_pass$/i', $name)) {
-            return (string) random_int(1, 5);
+            return (string) seed_random_int(1, 5);
         }
         if (preg_match('/^epics_las_mode_/i', $name)) {
-            return ['CW', 'Pulsed', 'OFF'][random_int(0, 2)];
+            return ['CW', 'Pulsed', 'OFF'][seed_random_int(0, 2)];
         }
         if (preg_match('/^fadc_(crate|slot)$/i', $name)) {
             return $name === 'fadc_crate' || str_ends_with(strtolower($name), 'crate')
                 ? 'vme-crate.example'
-                : (string) random_int(3, 8);
+                : (string) seed_random_int(3, 8);
         }
         // Pedestal / TET lists: comma-separated channel values.
         if (preg_match('/(allch_ped|^fadc_ped$)/i', $name) || stripos($col['comment'], 'Pedestal') !== false) {
@@ -203,17 +228,17 @@ function random_value_for_column(array $col)
         if (preg_match('/(allch_tet|^fadc_tet$)/i', $name) || stripos($col['comment'], 'threshold') !== false) {
             $vals = [];
             for ($i = 0; $i < 16; $i++) {
-                $vals[] = (string) random_int(20, 80);
+                $vals[] = (string) seed_random_int(20, 80);
             }
             return implode(',', $vals);
         }
         if (stripos($col['comment'], 'mask') !== false || preg_match('/_mask$/i', $name)) {
-            return '0x' . strtoupper(dechex(random_int(0, 0xFFFF)));
+            return '0x' . strtoupper(dechex(seed_random_int(0, 0xFFFF)));
         }
         if (preg_match('/mode$/i', $name)) {
-            return (string) random_int(0, 3);
+            return (string) seed_random_int(0, 3);
         }
-        return substr(bin2hex(random_bytes(6)), 0, 12);
+        return substr(bin2hex(seed_random_bytes(6)), 0, 12);
     }
 
     return null; // unhandled type — leave NULL rather than guess
@@ -224,8 +249,7 @@ function random_value_for_column(array $col)
  * $asymSign: +1 / -1 forces raw-asymmetry sign; null picks randomly.
  * $rateScale: multiplies the nominal rate band (used to step a Rate scan).
  */
-function generate_analysis_overrides(?int $asymSign = null, float $rateScale = 1.0): array
-{
+function generate_analysis_overrides($asymSign = null, $rateScale = 1.0){
     $leftRate  = rand_float(55000, 60000) * $rateScale;
     $rightRate = rand_float(55000, 60000) * $rateScale;
     $coinRate  = rand_float(42000, 48000) * $rateScale;
@@ -235,11 +259,11 @@ function generate_analysis_overrides(?int $asymSign = null, float $rateScale = 1
     $clk100khz = (int) round(jitter(100000, 0.25));
     $clk20mhz  = (int) round(jitter(20000000, 0.25));
 
-    $bcm         = random_int(200, 300);
+    $bcm         = seed_random_int(200, 300);
     $asymQ       = rand_float(1e-5, 8e-5); // 10–80 ppm
     $qpedCalc    = round(rand_float(6.0, 9.0), 4);
 
-    $sign        = $asymSign ?? (random_int(0, 1) ? 1 : -1);
+    $sign        = isset($asymSign) ? $asymSign : (seed_random_int(0, 1) ? 1 : -1);
     $asymMol     = rand_float(0.052, 0.056) * $sign;
     $asymMolErr  = pct_of($asymMol, 0.15, 0.25);
     $azz         = 0.776536;
@@ -279,27 +303,26 @@ function generate_analysis_overrides(?int $asymSign = null, float $rateScale = 1
 }
 
 /** Rough but plausible DAQ_config values for FADC / Møller trigger fields. */
-function generate_daq_overrides(): array
-{
-    $wOffset = random_int(80, 140);
-    $wWidth  = random_int(40, 80);
-    $nsb     = random_int(2, 8);
-    $nsa     = random_int(8, 24);
-    $npeak   = random_int(1, 3);
-    $maxped  = random_int(50, 100);
-    $nsat    = random_int(1, 3);
+function generate_daq_overrides(){
+    $wOffset = seed_random_int(80, 140);
+    $wWidth  = seed_random_int(40, 80);
+    $nsb     = seed_random_int(2, 8);
+    $nsa     = seed_random_int(8, 24);
+    $npeak   = seed_random_int(1, 3);
+    $maxped  = seed_random_int(50, 100);
+    $nsat    = seed_random_int(1, 3);
     $pedVals = [];
     $tetVals = [];
     for ($i = 0; $i < 16; $i++) {
         $pedVals[] = (string) round(rand_float(45, 85), 1);
-        $tetVals[] = (string) random_int(25, 70);
+        $tetVals[] = (string) seed_random_int(25, 70);
     }
     $samePed = round(rand_float(50, 70), 1);
-    $sameTet = (string) random_int(30, 60);
+    $sameTet = (string) seed_random_int(30, 60);
 
     return [
         'fadc_crate'    => 'vme-crate.example',
-        'fadc_slot'     => (string) random_int(3, 8),
+        'fadc_slot'     => (string) seed_random_int(3, 8),
         'fadc_adc_mask' => '0xFFFF',
         'fadc_trg_mask' => '0x00FF',
         'fadc_tet_ignore_mask' => '0x0000',
@@ -321,18 +344,18 @@ function generate_daq_overrides(): array
         'fadc_maxped'       => $maxped,
         'fadc_nsat'         => $nsat,
 
-        'fadc_dac'  => random_int(800, 1200),
+        'fadc_dac'  => seed_random_int(800, 1200),
         'fadc_gain' => round(rand_float(0.05, 0.25), 5),
         'fadc_accumulator_scaler_mode_mask' => '0x0000',
 
         'fadc_l_offset'   => round(rand_float(10, 40), 3),
         'fadc_r_offset'   => round(rand_float(10, 40), 3),
         'fadc_disc_width' => round(rand_float(1, 4), 2),
-        'fadc_disc_mode'  => random_int(0, 1),
+        'fadc_disc_mode'  => seed_random_int(0, 1),
         'fadc_l_sum_thr'  => round(rand_float(50, 200), 2),
         'fadc_r_sum_thr'  => round(rand_float(50, 200), 2),
-        'fadc_trg_sel'    => random_int(0, 2),
-        'fadc_trg_width'  => random_int(1, 8),
+        'fadc_trg_sel'    => seed_random_int(0, 2),
+        'fadc_trg_width'  => seed_random_int(1, 8),
 
         'fadc_allch_ped' => implode(',', $pedVals),
         'fadc_ped'       => (string) $samePed,
@@ -342,18 +365,17 @@ function generate_daq_overrides(): array
 }
 
 /** Rough EPICS snapshot: beam ~Hall A Møller energies, sensible currents/temps. */
-function generate_epics_overrides(): array
-{
+function generate_epics_overrides(){
     $eBeam = rand_float(1050, 1150);
     $bcm   = rand_float(0.8, 3.5);
-    $ihwp  = random_int(0, 1) ? 'IN' : 'OUT';
+    $ihwp  = seed_random_int(0, 1) ? 'IN' : 'OUT';
 
     return [
         'epics_E_beam'   => round($eBeam, 3),
         'epics_E_inj'    => round(rand_float(55, 65), 3),
         'epics_E_Slinac' => round(rand_float(500, 600), 2),
         'epics_E_Nlinac' => round(rand_float(500, 600), 2),
-        'epics_n_pass'   => (string) random_int(1, 5),
+        'epics_n_pass'   => (string) seed_random_int(1, 5),
 
         'epics_bcm_avg'     => round($bcm, 5),
         'epics_unser'       => round($bcm * rand_float(0.95, 1.05), 5),
@@ -377,7 +399,7 @@ function generate_epics_overrides(): array
         'epics_q4_cur'  => round(rand_float(50, 200), 2),
         'epics_dip_cur' => round(rand_float(100, 400), 2),
 
-        'epics_tgt_foil'      => random_int(1, 3),
+        'epics_tgt_foil'      => seed_random_int(1, 3),
         'epics_tgt_angle_deg' => round(rand_float(-5, 5), 3),
         'epics_tgt_lin_pos_mm'=> round(rand_float(0, 50), 3),
         'epics_tgt_ladder_temp1' => round(rand_float(20, 35), 2),
@@ -389,7 +411,7 @@ function generate_epics_overrides(): array
         'epics_vwien_angle' => round(rand_float(-90, 90), 2),
         'epics_hwien_angle' => round(rand_float(-90, 90), 2),
 
-        'epics_hel_pattern' => ['pair', 'quartet', 'octet'][random_int(0, 2)],
+        'epics_hel_pattern' => ['pair', 'quartet', 'octet'][seed_random_int(0, 2)],
         'epics_hel_freq'    => round(rand_float(29.5, 30.5), 6),
         'epics_t_settle'    => round(rand_float(60, 100), 2),
         'epics_t_stable'    => round(rand_float(400, 600), 2),
@@ -415,14 +437,13 @@ function generate_epics_overrides(): array
  * $nextGroup is advanced once per Polarization run, each Systematic study,
  * and each Rate scan series.
  */
-function build_day_schedule(string $dateLabel, int &$nextGroup): array
-{
+function build_day_schedule($dateLabel, &$nextGroup){
     $schedule = [];
 
     // Always: two Polarization runs with opposite-sign raw asymmetries.
     // Each gets its own run_group — a sign flip implies a different
     // iHWP / Wien combination, so they are not one analysis group.
-    $firstPolSign = random_int(0, 1) ? 1 : -1;
+    $firstPolSign = seed_random_int(0, 1) ? 1 : -1;
     $polGroupA = $nextGroup++;
     $schedule[] = [
         'run_type'   => 'POLARIZATION',
@@ -441,9 +462,9 @@ function build_day_schedule(string $dateLabel, int &$nextGroup): array
     ];
 
     // Optional: one Systematic study — its own unique run_group.
-    if (random_int(0, 1) === 1) {
+    if (seed_random_int(0, 1) === 1) {
         $sysGroup = $nextGroup++;
-        $sysSign = random_int(0, 1) ? 1 : -1;
+        $sysSign = seed_random_int(0, 1) ? 1 : -1;
         $schedule[] = [
             'run_type'   => 'SYSTEMATIC_STUDY',
             'run_group'  => $sysGroup,
@@ -455,9 +476,9 @@ function build_day_schedule(string $dateLabel, int &$nextGroup): array
 
     // Optional: Rate scan of 4–5 sequential runs — all share one run_group.
     // Scales step the detection rates so the scan is visually distinct.
-    if (random_int(0, 1) === 1) {
+    if (seed_random_int(0, 1) === 1) {
         $scanGroup = $nextGroup++;
-        $nScan = random_int(4, 5);
+        $nScan = seed_random_int(4, 5);
         for ($s = 0; $s < $nScan; $s++) {
             $scale = 0.55 + ($s / max(1, $nScan - 1)) * 0.55; // ~0.55 → 1.10
             $schedule[] = [
@@ -471,7 +492,7 @@ function build_day_schedule(string $dateLabel, int &$nextGroup): array
     }
 
     // Optional: a Test run in its own group (exercises the TEST lookup code).
-    if (random_int(0, 3) === 0) {
+    if (seed_random_int(0, 3) === 0) {
         $testGroup = $nextGroup++;
         $schedule[] = [
             'run_type'   => 'TEST',
@@ -493,11 +514,12 @@ function build_day_schedule(string $dateLabel, int &$nextGroup): array
  * @param list<array{0:float,1:float}> $pairs  [[value, error], ...]
  * @return array{0:float,1:float}|null
  */
-function error_weighted_average(array $pairs): ?array
-{
+function error_weighted_average($pairs){
     $wSum = 0.0;
     $wxSum = 0.0;
-    foreach ($pairs as [$val, $err]) {
+    foreach ($pairs as $pair) {
+        $val = $pair[0];
+        $err = $pair[1];
         $err = abs((float) $err);
         if ($err <= 0.0) {
             continue;
@@ -513,8 +535,7 @@ function error_weighted_average(array $pairs): ?array
 }
 
 /** Generic insert: build column list + values from schema metadata. */
-function insert_generic_row(PDO $pdo, string $table, array $columns, int $runNumber, array $overrides = []): void
-{
+function insert_generic_row($pdo, $table, $columns, $runNumber, $overrides = []){
     $cols = ['run_number'];
     $vals = [$runNumber];
 
@@ -529,14 +550,13 @@ function insert_generic_row(PDO $pdo, string $table, array $columns, int $runNum
     }
 
     $placeholders = implode(', ', array_fill(0, count($cols), '?'));
-    $colList      = implode(', ', array_map(fn($c) => "`{$c}`", $cols));
+    $colList      = implode(', ', array_map(function ($c) { return "`{$c}`"; }, $cols));
     $stmt = $pdo->prepare("INSERT INTO `{$table}` ({$colList}) VALUES ({$placeholders})");
     $stmt->execute($vals);
 }
 
 /** Insert one Grouped_Analysis row from an explicit value map (PK is group_number). */
-function insert_grouped_analysis_row(PDO $pdo, array $columns, array $values): void
-{
+function insert_grouped_analysis_row($pdo, $columns, $values){
     $cols = [];
     $vals = [];
     foreach ($columns as $col) {
@@ -553,7 +573,7 @@ function insert_grouped_analysis_row(PDO $pdo, array $columns, array $values): v
         return;
     }
     $placeholders = implode(', ', array_fill(0, count($cols), '?'));
-    $colList      = implode(', ', array_map(fn($c) => "`{$c}`", $cols));
+    $colList      = implode(', ', array_map(function ($c) { return "`{$c}`"; }, $cols));
     $stmt = $pdo->prepare("INSERT INTO `Grouped_Analysis` ({$colList}) VALUES ({$placeholders})");
     $stmt->execute($vals);
 }
@@ -584,7 +604,7 @@ $maxDayOffset = (int) (($yearEnd - $yearStart) / 86400);
 $daysNeeded = (int) ceil($targetRuns / 2) + 1;
 $dayOffsets = [];
 while (count($dayOffsets) < $daysNeeded && count($dayOffsets) <= $maxDayOffset) {
-    $offset = random_int(0, $maxDayOffset);
+    $offset = seed_random_int(0, $maxDayOffset);
     $dayOffsets[$offset] = true;
 }
 $dayOffsets = array_keys($dayOffsets);
@@ -606,7 +626,7 @@ try {
 
         foreach ($schedule as $slot) {
             $startTs = $dayStart + ($hour * 3600) + ($minute * 60);
-            $durationSec = random_int(8 * 60, 18 * 60); // 8–18 min run
+            $durationSec = seed_random_int(8 * 60, 18 * 60); // 8–18 min run
             $endTs   = $startTs + $durationSec;
             $analysisOverrides = generate_analysis_overrides($slot['asym_sign'], $slot['rate_scale']);
 
@@ -675,10 +695,10 @@ try {
             'group_comment' => "Grouped analysis for {$groupType} group {$gid}.",
             'group_start'   => date('Y-m-d H:i:s', $data['start_ts']),
             'group_end'     => date('Y-m-d H:i:s', $data['end_ts']),
-            'asym_mol'      => $asymAvg[0] ?? null,
-            'asym_mol_err'  => $asymAvg[1] ?? null,
-            'pol_beam'      => $polAvg[0] ?? null,
-            'pol_beam_err'  => $polAvg[1] ?? null,
+            'asym_mol'      => isset($asymAvg[0]) ? asymAvg[0] : null,
+            'asym_mol_err'  => isset($asymAvg[1]) ? asymAvg[1] : null,
+            'pol_beam'      => isset($polAvg[0]) ? polAvg[0] : null,
+            'pol_beam_err'  => isset($polAvg[1]) ? polAvg[1] : null,
             'epics_ihwp'    => $ihwpCycle[$groupIndex % 3],
             'epics_wien'    => $wienCycle[$groupIndex % 3],
         ]);
@@ -690,7 +710,7 @@ try {
     echo "Inserted {$totalRuns} fake runs across {$dayCount} day(s) "
         . "and {$groupIndex} grouped-analysis row(s) "
         . "(target >{$targetRuns}; run_number {$startRun}-{$lastRun}).\n";
-} catch (Throwable $e) {
+} catch (Exception $e) {
     $pdo->rollBack();
     fwrite(STDERR, 'Seeding failed: ' . $e->getMessage() . "\n");
     exit(1);

@@ -27,22 +27,22 @@ if ($reportScript !== 'report_advanced.php') {
     $reportScript = 'report.php';
 }
 
-$filterType  = $_GET['type'] ?? '';
-$filterExperiment = trim((string)($_GET['experiment'] ?? ''));
-$filterDateFrom = parse_ymd_query_param($_GET['from'] ?? '');
-$filterDateTo   = parse_ymd_query_param($_GET['to'] ?? '');
+$filterType  = isset($_GET['type']) ? $_GET['type'] : '';
+$filterExperiment = trim((string)(isset($_GET['experiment']) ? $_GET['experiment'] : ''));
+$filterDateFrom = parse_ymd_query_param(isset($_GET['from']) ? $_GET['from'] : '');
+$filterDateTo   = parse_ymd_query_param(isset($_GET['to']) ? $_GET['to'] : '');
 if ($filterDateFrom !== null && $filterDateTo !== null && $filterDateFrom > $filterDateTo) {
     [$filterDateFrom, $filterDateTo] = [$filterDateTo, $filterDateFrom];
 }
-$runSearch   = trim((string)($_GET['run'] ?? ''));
-$groupSearch = trim((string)($_GET['group'] ?? ''));
+$runSearch   = trim((string)(isset($_GET['run']) ? $_GET['run'] : ''));
+$groupSearch = trim((string)(isset($_GET['group']) ? $_GET['group'] : ''));
 $filterRun   = ($runSearch !== '' && ctype_digit($runSearch)) ? (int)$runSearch : null;
 $filterGroup = ($groupSearch !== '' && ctype_digit($groupSearch)) ? (int)$groupSearch : null;
-$findRaw = (string)($_GET['find'] ?? '');
+$findRaw = (string)(isset($_GET['find']) ? $_GET['find'] : '');
 $find = ($findRaw === 'run' || $findRaw === 'group') ? $findRaw : '';
 
-$defaultView = ($config['default_view'] ?? 'runs') === 'groups' ? 'groups' : 'runs';
-$view = ($_GET['view'] ?? $defaultView) === 'groups' ? 'groups' : 'runs';
+$defaultView = (isset($config['default_view']) ? $config['default_view'] : 'runs') === 'groups' ? 'groups' : 'runs';
+$view = (isset($_GET['view']) ? $_GET['view'] : $defaultView) === 'groups' ? 'groups' : 'runs';
 
 if ($find === 'run') {
     $view = 'runs';
@@ -56,7 +56,7 @@ if ($find === 'run') {
     $view = 'groups';
 }
 
-$rowCap = max(1, (int)($config['report_row_cap'] ?? 2000));
+$rowCap = max(1, (int)(isset($config['report_row_cap']) ? $config['report_row_cap'] : 2000));
 
 $typeTable  = $view === 'groups' ? 'Grouped_Analysis' : 'Run_info';
 $typeColumn = $view === 'groups' ? 'group_type' : 'run_type';
@@ -82,13 +82,13 @@ $requestedFields = null;
 if ($colsExplicit) {
     $rawCols = $_GET['cols'];
     if (is_array($rawCols)) {
-        $requestedFields = array_values(array_filter(array_map('strval', $rawCols), fn($v) => $v !== ''));
+        $requestedFields = array_values(array_filter(array_map('strval', $rawCols), function ($v) { return $v !== ''; }));
     } else {
-        $requestedFields = array_values(array_filter(array_map('trim', explode(',', (string)$rawCols)), fn($v) => $v !== ''));
+        $requestedFields = array_values(array_filter(array_map('trim', explode(',', (string)$rawCols)), function ($v) { return $v !== ''; }));
     }
 }
 $selectedColumns = report_selected_columns($pdo, $view, $requestedFields);
-$selectedFields = array_map(fn($c) => (string)$c['field'], $selectedColumns);
+$selectedFields = array_map(function ($c) { return (string)$c['field']; }, $selectedColumns);
 
 $reportMoreOpen = false;
 foreach (array_slice($availableColumnRows, 1) as $moreRow) {
@@ -242,24 +242,24 @@ if ($hasExperimentColumn) {
     }
 }
 
-$formatRaw = strtolower((string)($_GET['format'] ?? ''));
+$formatRaw = strtolower((string)(isset($_GET['format']) ? $_GET['format'] : ''));
 $format = ($formatRaw === 'csv') ? 'csv' : 'html';
 
-$qs = function (array $overrides) use ($defaultView, $selectedFields, $colsExplicit): string {
+$qs = function ($overrides) use ($defaultView, $selectedFields, $colsExplicit {
     $base = [
-        'view'       => $_GET['view'] ?? $defaultView,
-        'type'       => $_GET['type'] ?? '',
-        'experiment' => $_GET['experiment'] ?? '',
-        'from'       => $_GET['from'] ?? '',
-        'to'         => $_GET['to'] ?? '',
-        'run'        => $_GET['run'] ?? '',
-        'group'      => $_GET['group'] ?? '',
+        'view'       => isset($_GET['view']) ? $_GET['view'] : $defaultView,
+        'type'       => isset($_GET['type']) ? $_GET['type'] : '',
+        'experiment' => isset($_GET['experiment']) ? $_GET['experiment'] : '',
+        'from'       => isset($_GET['from']) ? $_GET['from'] : '',
+        'to'         => isset($_GET['to']) ? $_GET['to'] : '',
+        'run'        => isset($_GET['run']) ? $_GET['run'] : '',
+        'group'      => isset($_GET['group']) ? $_GET['group'] : '',
     ];
     if ($colsExplicit) {
         $base['cols'] = $selectedFields;
     }
     $merged = array_merge($base, $overrides);
-    if (($merged['view'] ?? $defaultView) === $defaultView) {
+    if ((isset($merged['view']) ? $merged['view'] : $defaultView) === $defaultView) {
         unset($merged['view']);
     }
     if (isset($merged['format']) && $merged['format'] === 'html') {
@@ -295,7 +295,7 @@ $resetColsParams = [
     'run'        => $filterRun !== null ? (string)$filterRun : null,
     'group'      => $filterGroup !== null ? (string)$filterGroup : null,
 ];
-$resetColsHref = $reportScript . (($q = http_build_query(array_filter($resetColsParams, fn($v) => $v !== null && $v !== ''))) === '' ? '' : ('?' . $q));
+$resetColsHref = $reportScript . (($q = http_build_query(array_filter($resetColsParams, function ($v) { return $v !== null && $v !== ''; }))) === '' ? '' : ('?' . $q));
 
 $csvHref = $reportScript . $qs(['format' => 'csv']);
 
@@ -311,4 +311,4 @@ $filtersActive = (
     || $filterRun !== null
     || $filterGroup !== null
 );
-$siteTitle = (string)($config['site_title'] ?? 'Møller Run Log');
+$siteTitle = (string)(isset($config['site_title']) ? $config['site_title'] : 'Møller Run Log');

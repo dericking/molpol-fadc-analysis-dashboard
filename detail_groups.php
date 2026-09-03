@@ -58,10 +58,10 @@ $noStartTimeLabel    = 'no start time';
 $noEndTimeLabel      = 'ongoing / not recorded';
 // --- end page copy ---
 
-$defaultLayout = ($config['default_layout'] ?? 'table') === 'cards' ? 'cards' : 'table';
-$listLayout = ($_GET['layout'] ?? $defaultLayout) === 'table' ? 'table' : 'cards';
+$defaultLayout = (isset($config['default_layout']) ? $config['default_layout'] : 'table') === 'cards' ? 'cards' : 'table';
+$listLayout = (isset($_GET['layout']) ? $_GET['layout'] : $defaultLayout) === 'table' ? 'table' : 'cards';
 
-$layoutQs = function (string $nextLayout) use ($groupId, $defaultLayout): string {
+$layoutQs = function ($nextLayout) use ($groupId, $defaultLayout {
     $params = ['group' => (int)$groupId];
     if ($nextLayout !== $defaultLayout) {
         $params['layout'] = $nextLayout;
@@ -147,7 +147,7 @@ $layoutQs = function (string $nextLayout) use ($groupId, $defaultLayout): string
       <a class="modal-close" href="#" aria-label="Close">Close</a>
     </div>
     <?php
-      render_run_summary($pack['row'] ?? [], 'group', [
+      render_run_summary(isset($pack['row']) ? $pack['row'] : [], 'group', [
           'empty_start' => $noStartTimeLabel,
           'empty_end'   => $noEndTimeLabel,
       ]);

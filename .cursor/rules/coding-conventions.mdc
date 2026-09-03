@@ -13,8 +13,8 @@ alwaysApply: false
 - Prepared statements / bound parameters only. Table/column names in SQL come
   from `get_table_columns()` or fixed constants — never from request input.
 - Validate run/group ids (`FILTER_VALIDATE_INT`) with an explicit 400 on failure.
-- Prefer `array_filter` / `array_map` / `fn()` for column-list transforms, matching
-  existing `render_helpers.php` style.
+- Prefer `array_filter` / `array_map` with `function ($x) { ... }` for column-list transforms, matching
+  existing `render_helpers.php` style (PHP 5.4 — no arrow functions).
 - Layout / classifier / column-order edits go in `includes/layouts/` — not inline
   in page files. No URLs in most layout files; the app owns hrefs. Exception:
   `layout_navbar.php` holds site-wide nav `href`s by design.

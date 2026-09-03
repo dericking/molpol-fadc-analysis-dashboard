@@ -20,11 +20,11 @@ if ($isIndex) {
     $pageTitle = 'Status message help';
 } elseif (isset($catalog[$key])) {
     $entry     = $catalog[$key];
-    $pageTitle = (string)($entry['title'] ?? $key);
+    $pageTitle = (string)(isset($entry['title']) ? $entry['title'] : $key);
     $title     = $pageTitle;
-    $summary   = (string)($entry['summary'] ?? '');
-    $body      = trim((string)($entry['body'] ?? ''));
-    $fix       = trim((string)($entry['fix'] ?? ''));
+    $summary   = (string)(isset($entry['summary']) ? $entry['summary'] : '');
+    $body      = trim((string)(isset($entry['body']) ? $entry['body'] : ''));
+    $fix       = trim((string)(isset($entry['fix']) ? $entry['fix'] : ''));
 } else {
     http_response_code(404);
     $entry     = null;
@@ -42,12 +42,11 @@ if ($isIndex) {
  *
  * @param array{title?:string,summary?:string,body?:string,fix?:string} $entry
  */
-function render_help_topic(string $topicKey, array $entry, bool $asSection = false): void
-{
-    $title   = (string)($entry['title'] ?? $topicKey);
-    $summary = (string)($entry['summary'] ?? '');
-    $body    = trim((string)($entry['body'] ?? ''));
-    $fix     = trim((string)($entry['fix'] ?? ''));
+function render_help_topic($topicKey, $entry, $asSection = false){
+    $title   = (string)(isset($entry['title']) ? $entry['title'] : $topicKey);
+    $summary = (string)(isset($entry['summary']) ? $entry['summary'] : '');
+    $body    = trim((string)(isset($entry['body']) ? $entry['body'] : ''));
+    $fix     = trim((string)(isset($entry['fix']) ? $entry['fix'] : ''));
 
     if ($asSection) {
         echo '<article class="help-topic" id="' . htmlspecialchars($topicKey) . '">';
@@ -101,7 +100,7 @@ function render_help_topic(string $topicKey, array $entry, bool $asSection = fal
       <?php foreach ($catalog as $navKey => $navEntry): ?>
         <li>
           <a href="#<?= htmlspecialchars((string)$navKey) ?>">
-            <?= htmlspecialchars((string)($navEntry['title'] ?? $navKey)) ?>
+            <?= htmlspecialchars((string)(isset($navEntry['title']) ? $navEntry['title'] : $navKey)) ?>
           </a>
         </li>
       <?php endforeach; ?>

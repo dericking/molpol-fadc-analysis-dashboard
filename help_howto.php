@@ -5,7 +5,7 @@
  */
 require_once __DIR__ . '/includes/bootstrap.php';
 
-$pageTitle = ((string)($config['site_title'] ?? 'Møller Run Log')) . ' — How-to';
+$pageTitle = ((string)(isset($config['site_title']) ? $config['site_title'] : 'Møller Run Log')) . ' — How-to';
 ?>
 <!DOCTYPE html>
 <html lang="en">

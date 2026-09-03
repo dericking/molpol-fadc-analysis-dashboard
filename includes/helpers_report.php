@@ -8,8 +8,7 @@
 /**
  * Load report column catalog from includes/layouts/layout_report.php (cached).
  */
-function get_report_layouts(): array
-{
+function get_report_layouts(){
     static $layouts = null;
     if ($layouts === null) {
         $layouts = require __DIR__ . '/layouts/layout_report.php';
@@ -23,8 +22,7 @@ function get_report_layouts(): array
  *
  * @return array<string, array{table:string,alias:string,join:bool}>
  */
-function report_source_tables(): array
-{
+function report_source_tables(){
     return [
         'run'      => ['table' => 'Run_info',          'alias' => 'r', 'join' => false],
         'analysis' => ['table' => 'Analysis',          'alias' => 'a', 'join' => false],
@@ -37,8 +35,7 @@ function report_source_tables(): array
 /**
  * @return array<string, array<string,true>>
  */
-function report_schema_field_sets(PDO $pdo): array
-{
+function report_schema_field_sets($pdo){
     static $cache = null;
     if ($cache !== null) {
         return $cache;
@@ -61,13 +58,12 @@ function report_schema_field_sets(PDO $pdo): array
  *
  * @return list<list<array<string,mixed>|null>>
  */
-function report_layout_raw_rows(array $pack): array
-{
-    $rows = $pack['section_rows'] ?? null;
+function report_layout_raw_rows($pack){
+    $rows = isset($pack['section_rows']) ? $pack['section_rows'] : null;
     if (is_array($rows) && $rows !== []) {
         return $rows;
     }
-    $sections = $pack['sections'] ?? null;
+    $sections = isset($pack['sections']) ? $pack['sections'] : null;
     if (is_array($sections) && $sections !== []) {
         return [$sections];
     }
@@ -80,19 +76,18 @@ function report_layout_raw_rows(array $pack): array
  *
  * @return list<array{key:string,summary:string}>
  */
-function report_layout_column_warnings(PDO $pdo, string $view): array
-{
+function report_layout_column_warnings($pdo, $view){
     $key = $view === 'groups' ? 'group' : 'run';
-    $pack = get_report_layouts()[$key] ?? [];
+    $pack = (($__rl = get_report_layouts()) && isset($__rl[$key]) ? $__rl[$key] : []);
     $sets = report_schema_field_sets($pdo);
     $warnings = [];
     $seenMissing = [];
 
-    $sourceOk = static function (string $field, string $source) use ($sets): bool {
+    $sourceOk = static function ($field, $source) use ($sets){
         return isset($sets[$source][$field]);
     };
 
-    $noteMissing = static function (string $field, string $where, string $detail) use (&$warnings, &$seenMissing): void {
+    $noteMissing = static function ($field, $where, $detail) use (&$warnings, &$seenMissing){
         $dedupe = $field . "\0" . $where;
         if (isset($seenMissing[$dedupe])) {
             return;
@@ -116,8 +111,8 @@ function report_layout_column_warnings(PDO $pdo, string $view): array
                 if (!is_array($section)) {
                     continue;
                 }
-                $title = trim((string)($section['title'] ?? 'Columns'));
-                $columns = $section['columns'] ?? [];
+                $title = trim((string)(isset($section['title']) ? $section['title'] : 'Columns'));
+                $columns = isset($section['columns']) ? $section['columns'] : [];
                 if (!is_array($columns)) {
                     continue;
                 }
@@ -129,7 +124,7 @@ function report_layout_column_warnings(PDO $pdo, string $view): array
             }
         }
     } else {
-        $available = $pack['available'] ?? [];
+        $available = isset($pack['available']) ? $pack['available'] : [];
         if (is_array($available)) {
             foreach ($available as $entry) {
                 if (is_array($entry)) {
@@ -160,7 +155,7 @@ function report_layout_column_warnings(PDO $pdo, string $view): array
         $catalogFields[$field] = true;
     }
 
-    $defaults = $pack['defaults'] ?? [];
+    $defaults = isset($pack['defaults']) ? $pack['defaults'] : [];
     if (is_array($defaults)) {
         foreach ($defaults as $name) {
             $name = (string)$name;
@@ -186,8 +181,7 @@ function report_layout_column_warnings(PDO $pdo, string $view): array
  *
  * @return list<array{field:string,header:string,source:string,kind?:string,link?:string}>
  */
-function report_available_columns(PDO $pdo, string $view): array
-{
+function report_available_columns($pdo, $view){
     $flat = [];
     foreach (report_available_column_rows($pdo, $view) as $row) {
         foreach ($row as $section) {
@@ -207,8 +201,7 @@ function report_available_columns(PDO $pdo, string $view): array
  *
  * @return list<array{title:string,columns:list<array{field:string,header:string,source:string,kind?:string,link?:string}>}>
  */
-function report_available_column_sections(PDO $pdo, string $view): array
-{
+function report_available_column_sections($pdo, $view){
     $flat = [];
     foreach (report_available_column_rows($pdo, $view) as $row) {
         foreach ($row as $section) {
@@ -225,14 +218,13 @@ function report_available_column_sections(PDO $pdo, string $view): array
  *
  * @return list<list<array{title:string,columns:list<array{field:string,header:string,source:string,kind?:string,link?:string}>}|null>>
  */
-function report_available_column_rows(PDO $pdo, string $view): array
-{
+function report_available_column_rows($pdo, $view){
     $key = $view === 'groups' ? 'group' : 'run';
-    $pack = get_report_layouts()[$key] ?? [];
+    $pack = (($__rl = get_report_layouts()) && isset($__rl[$key]) ? $__rl[$key] : []);
     $sets = report_schema_field_sets($pdo);
     $sourceMap = report_source_tables();
 
-    $fieldOk = static function (array $entry) use ($sets, $sourceMap): bool {
+    $fieldOk = static function ($entry) use ($sets, $sourceMap){
         if (!isset($entry['field'], $entry['header'], $entry['source'])) {
             return false;
         }
@@ -245,7 +237,7 @@ function report_available_column_rows(PDO $pdo, string $view): array
 
     $rawRows = report_layout_raw_rows($pack);
     if ($rawRows === []) {
-        $available = $pack['available'] ?? [];
+        $available = isset($pack['available']) ? $pack['available'] : [];
         $cols = [];
         if (is_array($available)) {
             foreach ($available as $entry) {
@@ -272,8 +264,8 @@ function report_available_column_rows(PDO $pdo, string $view): array
             if (!is_array($slot)) {
                 continue;
             }
-            $title = trim((string)($slot['title'] ?? ''));
-            $columns = $slot['columns'] ?? [];
+            $title = trim((string)(isset($slot['title']) ? $slot['title'] : ''));
+            $columns = isset($slot['columns']) ? $slot['columns'] : [];
             if (!is_array($columns)) {
                 $built[] = null;
                 continue;
@@ -307,13 +299,12 @@ function report_available_column_rows(PDO $pdo, string $view): array
  * @param list<array{field:string,source:string}> $selectedColumns
  * @return array{select:string,join:string}
  */
-function report_extra_join_sql(PDO $pdo, array $selectedColumns): array
-{
+function report_extra_join_sql($pdo, $selectedColumns){
     $bySource = [];
     foreach ($selectedColumns as $col) {
-        $src = (string)($col['source'] ?? '');
-        $field = (string)($col['field'] ?? '');
-        $spec = report_source_tables()[$src] ?? null;
+        $src = (string)(isset($col['source']) ? $col['source'] : '');
+        $field = (string)(isset($col['field']) ? $col['field'] : '');
+        $spec = (($__rt = report_source_tables()) && isset($__rt[$src]) ? $__rt[$src] : null);
         if ($spec === null || empty($spec['join'])) {
             continue;
         }
@@ -362,8 +353,7 @@ function report_extra_join_sql(PDO $pdo, array $selectedColumns): array
  * @param list<string>|null $requestedFields
  * @return list<array{field:string,header:string,source:string,kind?:string,link?:string}>
  */
-function report_selected_columns(PDO $pdo, string $view, ?array $requestedFields): array
-{
+function report_selected_columns($pdo, $view, $requestedFields){
     $available = report_available_columns($pdo, $view);
     $byField = [];
     foreach ($available as $entry) {
@@ -371,7 +361,7 @@ function report_selected_columns(PDO $pdo, string $view, ?array $requestedFields
     }
 
     $key = $view === 'groups' ? 'group' : 'run';
-    $defaults = get_report_layouts()[$key]['defaults'] ?? [];
+    $defaults = (($__rl = get_report_layouts()) && isset($__rl[$key]['defaults']) ? $__rl[$key]['defaults'] : []);
     if (!is_array($defaults)) {
         $defaults = [];
     }
@@ -393,7 +383,7 @@ function report_selected_columns(PDO $pdo, string $view, ?array $requestedFields
             }
         }
         foreach ($available as $entry) {
-            $field = (string)($entry['field'] ?? '');
+            $field = (string)(isset($entry['field']) ? $entry['field'] : '');
             if ($field !== '' && isset($defaultSet[$field])) {
                 $pick[] = $entry;
             }
@@ -408,8 +398,7 @@ function report_selected_columns(PDO $pdo, string $view, ?array $requestedFields
  * @param list<array{title:string,columns:list<array{field:string,header:string}>}|null> $row
  * @param list<string> $selectedFields
  */
-function render_report_column_picker_row(array $row, array $selectedFields): void
-{
+function render_report_column_picker_row($row, $selectedFields){
     echo '<div class="report-column-row">';
     foreach ($row as $section) {
         if ($section === null) {
@@ -436,14 +425,13 @@ function render_report_column_picker_row(array $row, array $selectedFields): voi
 /**
  * Plain-text cell value for report table / CSV (lookup labels for type/quality).
  */
-function report_cell_text(array $col, array $row): string
-{
-    $field = (string)($col['field'] ?? '');
-    $raw = $row[$field] ?? null;
+function report_cell_text($col, $row){
+    $field = (string)(isset($col['field']) ? $col['field'] : '');
+    $raw = isset($row[$field]) ? $row[$field] : null;
     if ($raw === null || $raw === '') {
         return '';
     }
-    $kind = $col['kind'] ?? 'text';
+    $kind = isset($col['kind']) ? $col['kind'] : 'text';
     if ($kind === 'quality' || lookup_table_for_column($field) !== null) {
         $label = lookup_label_for_field($field, $raw);
         return $label !== '' ? $label : (string)$raw;
@@ -457,30 +445,29 @@ function report_cell_text(array $col, array $row): string
  * @param list<array{field:string,header:string,source:string,kind?:string,link?:string}> $columns
  * @param list<array<string,mixed>> $rows
  */
-function render_report_table(array $columns, array $rows): void
-{
+function render_report_table($columns, $rows){
     if ($columns === [] || $rows === []) {
         return;
     }
     echo '<div class="list-table-wrap report-table-wrap"><table class="list-table report-table">';
     echo '<thead><tr>';
     foreach ($columns as $col) {
-        echo '<th>' . htmlspecialchars((string)($col['header'] ?? '')) . '</th>';
+        echo '<th>' . htmlspecialchars((string)(isset($col['header']) ? $col['header'] : '')) . '</th>';
     }
     echo '</tr></thead><tbody>';
     foreach ($rows as $data) {
         echo '<tr class="list-table-row">';
         foreach ($columns as $col) {
-            $kind = $col['kind'] ?? 'text';
+            $kind = isset($col['kind']) ? $col['kind'] : 'text';
             $cell = [
                 'kind'  => ($kind === 'id' || $kind === 'quality') ? $kind : 'text',
-                'field' => $col['field'] ?? '',
+                'field' => isset($col['field']) ? $col['field'] : '',
             ];
             if (isset($col['link'])) {
                 $cell['link'] = $col['link'];
             }
             $html = list_cell_with_optional_link($cell, $data);
-            echo '<td>' . ($html ?? '—') . '</td>';
+            echo '<td>' . (isset($html) ? $html : '—') . '</td>';
         }
         echo '</tr>';
     }
@@ -498,8 +485,7 @@ function render_report_table(array $columns, array $rows): void
  * Numbers are left alone — negative measurements such as -472.99 are ordinary
  * data, not formulas, and must not gain a stray quote.
  */
-function csv_safe_cell(string $value): string
-{
+function csv_safe_cell($value){
     if ($value === '' || is_numeric($value)) {
         return $value;
     }
@@ -512,8 +498,7 @@ function csv_safe_cell(string $value): string
  * @param list<array{field:string,header:string,source:string,kind?:string,link?:string}> $columns
  * @param list<array<string,mixed>> $rows
  */
-function emit_report_csv(string $view, array $columns, array $rows): void
-{
+function emit_report_csv($view, $columns, $rows){
     $stamp = date('Ymd');
     $kind = $view === 'groups' ? 'groups' : 'runs';
     $filename = "molpol-{$kind}-{$stamp}.csv";
@@ -530,7 +515,7 @@ function emit_report_csv(string $view, array $columns, array $rows): void
     }
     // UTF-8 BOM helps Excel
     fwrite($out, "\xEF\xBB\xBF");
-    $headers = array_map(fn($c) => (string)($c['header'] ?? ''), $columns);
+    $headers = array_map(function ($c) { return (string)(isset($c['header']) ? $c['header'] : ''); }, $columns);
     fputcsv($out, $headers);
     foreach ($rows as $row) {
         $line = [];

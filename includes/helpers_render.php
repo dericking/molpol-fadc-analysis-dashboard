@@ -6,13 +6,12 @@
  */
 
 /** Maps a quality code (or legacy ENUM label) to the stylesheet class suffix. */
-function quality_slug(?string $quality): string
-{
+function quality_slug($quality){
     if ($quality === null || $quality === '') {
         return 'pending';
     }
     $raw = (string)$quality;
-    $slugs = get_lookup_layouts()['quality_slugs'] ?? [];
+    $slugs = (($__lk = get_lookup_layouts()) && isset($__lk['quality_slugs']) ? $__lk['quality_slugs'] : []);
     if (isset($slugs[$raw]) && is_string($slugs[$raw]) && $slugs[$raw] !== '') {
         return $slugs[$raw];
     }
@@ -26,8 +25,7 @@ function quality_slug(?string $quality): string
     return preg_match('/^[a-z]+$/', $slug) ? $slug : 'unknown';
 }
 
-function format_group_label($groupId): string
-{
+function format_group_label($groupId){
     if ($groupId === null || $groupId === '') {
         return '—';
     }
@@ -37,8 +35,7 @@ function format_group_label($groupId): string
 /**
  * Require a positive integer query param or emit a short 400 page and exit.
  */
-function require_positive_int_query(string $param): int
-{
+function require_positive_int_query($param){
     $value = filter_input(INPUT_GET, $param, FILTER_VALIDATE_INT, [
         'options' => ['min_range' => 1],
     ]);
@@ -58,8 +55,7 @@ function require_positive_int_query(string $param): int
 /**
  * Require a row by primary key or emit a short 404 page and exit.
  */
-function require_row(PDO $pdo, string $table, string $pkColumn, $id, string $label): array
-{
+function require_row($pdo, $table, $pkColumn, $id, $label){
     $row = fetch_row_by_key($pdo, $table, $pkColumn, $id);
     if ($row === null) {
         http_response_code(404);
@@ -78,8 +74,7 @@ function require_row(PDO $pdo, string $table, string $pkColumn, $id, string $lab
 /**
  * Section title bar; optional meta-right as "Label: value" (value — if null).
  */
-function render_section_header(string $title, ?string $metaLabel = null, $metaValue = null): void
-{
+function render_section_header($title, $metaLabel = null, $metaValue = null){
     echo '<div class="section-header">';
     echo '<h2>' . htmlspecialchars($title) . '</h2>';
     if ($metaLabel !== null && $metaLabel !== '') {
@@ -91,16 +86,14 @@ function render_section_header(string $title, ?string $metaLabel = null, $metaVa
     echo '</div>';
 }
 
-function render_empty_state(string $message): void
-{
+function render_empty_state($message){
     echo '<p class="empty-state">' . htmlspecialchars($message) . '</p>';
 }
 
 /**
  * Load on-page status help catalog (cached per request).
  */
-function get_error_descriptions(): array
-{
+function get_error_descriptions(){
     static $catalog = null;
     if ($catalog === null) {
         $catalog = require __DIR__ . '/descriptions_errors.php';
@@ -108,8 +101,7 @@ function get_error_descriptions(): array
     return $catalog;
 }
 
-function render_status_info_link(string $key): void
-{
+function render_status_info_link($key){
     $catalog = get_error_descriptions();
     if (!isset($catalog[$key]) || !is_array($catalog[$key])) {
         return;
@@ -123,16 +115,15 @@ function render_status_info_link(string $key): void
 /**
  * Inline status / warning with optional ⓘ link to help_errors.php (new tab, no JS).
  *
- * @param string      $key             Catalog key in descriptions_errors.php
+ * @param $key             Catalog key in descriptions_errors.php
  * @param string|null $summaryOverride Short line; defaults to catalog summary
  */
-function render_status_message(string $key, ?string $summaryOverride = null): void
-{
+function render_status_message($key, $summaryOverride = null){
     $catalog = get_error_descriptions();
-    $entry = $catalog[$key] ?? null;
+    $entry = isset($catalog[$key]) ? $catalog[$key] : null;
     $summary = $summaryOverride;
     if ($summary === null || $summary === '') {
-        $summary = is_array($entry) ? (string)($entry['summary'] ?? $key) : $key;
+        $summary = is_array($entry) ? (string)(isset($entry['summary']) ? $entry['summary'] : $key) : $key;
     }
 
     echo '<div class="status-message">';
@@ -148,15 +139,14 @@ function render_status_message(string $key, ?string $summaryOverride = null): vo
  *
  * @param list<array{key?:string,summary?:string}|string> $warnings
  */
-function render_status_warning_box(array $warnings): void
-{
+function render_status_warning_box($warnings){
     if ($warnings === []) {
         return;
     }
     echo '<div class="status-warning-box" role="status">';
     foreach ($warnings as $warn) {
-        $key = is_array($warn) ? (string)($warn['key'] ?? 'report_unknown_column') : 'report_unknown_column';
-        $summary = is_array($warn) ? (string)($warn['summary'] ?? '') : (string)$warn;
+        $key = is_array($warn) ? (string)(isset($warn['key']) ? $warn['key'] : 'report_unknown_column') : 'report_unknown_column';
+        $summary = is_array($warn) ? (string)(isset($warn['summary']) ? $warn['summary'] : '') : (string)$warn;
         render_status_message($key, $summary !== '' ? $summary : null);
     }
     echo '</div>';
@@ -166,9 +156,8 @@ function render_status_warning_box(array $warnings): void
  * Show caretaker-facing layout config errors (malformed layouts bands).
  * Soft failure — page still renders; does not TypeError.
  */
-function render_layout_errors(array $pack): void
-{
-    foreach ($pack['layout_errors'] ?? [] as $err) {
+function render_layout_errors($pack){
+    foreach (isset($pack['layout_errors']) ? $pack['layout_errors'] : [] as $err) {
         if (is_string($err) && $err !== '') {
             // Back-compat: plain string
             render_status_message('layout_flat_list', 'WARNING: ' . $err);
@@ -186,11 +175,10 @@ function render_layout_errors(array $pack): void
 /**
  * Render all featured rows from a load_section_view() pack.
  */
-function render_featured_rows(array $pack): void
-{
-    $row = $pack['row'] ?? null;
-    foreach ($pack['featured_rows'] ?? [] as $feat) {
-        render_featured_row($feat['title'] ?? '', $feat['columns'] ?? [], $row);
+function render_featured_rows($pack){
+    $row = isset($pack['row']) ? $pack['row'] : null;
+    foreach (isset($pack['featured_rows']) ? $pack['featured_rows'] : [] as $feat) {
+        render_featured_row(isset($feat['title']) ? $feat['title'] : '', isset($feat['columns']) ? $feat['columns'] : [], $row);
     }
 }
 
@@ -198,14 +186,13 @@ function render_featured_rows(array $pack): void
  * Render one named layout band from a load_section_view() pack.
  * No-op if the band is missing or empty.
  */
-function render_section_cards(array $pack, string $layoutName): void
-{
-    $rows = $pack['layouts'][$layoutName] ?? [];
+function render_section_cards($pack, $layoutName){
+    $rows = isset($pack['layouts'][$layoutName]) ? $pack['layouts'][$layoutName] : [];
     if (!is_array($rows) || $rows === []) {
         return;
     }
-    $sections = $pack['sections'] ?? [];
-    $row = $pack['row'] ?? null;
+    $sections = isset($pack['sections']) ? $pack['sections'] : [];
+    $row = isset($pack['row']) ? $pack['row'] : null;
     foreach ($rows as $rowKeys) {
         if (!is_array($rowKeys)) {
             continue;
@@ -218,9 +205,8 @@ function render_section_cards(array $pack, string $layoutName): void
  * Render classifier sections not listed in featured/layouts (band 'unallocated').
  * No-op when empty — pages can call this unconditionally after their layout bands.
  */
-function render_unallocated_sections(array $pack, string $heading): void
-{
-    $rows = $pack['layouts']['unallocated'] ?? [];
+function render_unallocated_sections($pack, $heading){
+    $rows = isset($pack['layouts']['unallocated']) ? $pack['layouts']['unallocated'] : [];
     if (!is_array($rows) || $rows === []) {
         return;
     }
@@ -237,9 +223,8 @@ function render_unallocated_sections(array $pack, string $heading): void
  * Column count comes from count($rowKeys) — the row's declared length —
  * not the number of real cards, so a null spacer genuinely holds its slot.
  */
-function render_card_row(array $rowKeys, array $sections, ?array $row): void
-{
-    $hasAnyContent = array_filter($rowKeys, fn($k) => $k !== null && isset($sections[$k]));
+function render_card_row($rowKeys, $sections, $row){
+    $hasAnyContent = array_filter($rowKeys, function ($k) { return $k !== null && isset($sections[$k]); });
     if (!$hasAnyContent) {
         return;
     }
@@ -264,8 +249,7 @@ function render_card_row(array $rowKeys, array $sections, ?array $row): void
  * own column, label over value. Used for a page's one standout card
  * (Analysis's Asymmetries & Polarization, EPICS's Polarization & Wien).
  */
-function render_featured_row(string $title, array $columns, ?array $row): void
-{
+function render_featured_row($title, $columns, $row){
     if (!$columns) {
         return;
     }
@@ -281,13 +265,11 @@ function render_featured_row(string $title, array $columns, ?array $row): void
  * Insert a space after each comma so long CSV-like strings (masks, ped lists)
  * can wrap in the UI. Collapses ",  " → ", ". Display-only — not for CSV.
  */
-function soft_wrap_commas(string $text): string
-{
-    return preg_replace('/,\s*/', ', ', $text) ?? $text;
+function soft_wrap_commas($text){
+    $__sw = preg_replace('/,\s*/', ', ', $text); return $__sw !== null ? $__sw : $text;
 }
 
-function fmt_value($value): string
-{
+function fmt_value($value){
     if ($value === null || $value === '') {
         return '—';
     }
@@ -300,8 +282,7 @@ function fmt_value($value): string
  * as one row: "value ± error" under the base column's label; the `_err` column
  * is suppressed. An orphan `_err` with no base sibling still renders alone.
  */
-function render_field_list(array $columns, ?array $row, string $skipColumn = 'run_number'): void
-{
+function render_field_list($columns, $row, $skipColumn = 'run_number'){
     if ($row === null) {
         render_status_message('empty_table_row');
         return;
@@ -320,7 +301,7 @@ function render_field_list(array $columns, ?array $row, string $skipColumn = 'ru
                 continue;
             }
         }
-        $val = $row[$name] ?? null;
+        $val = isset($row[$name]) ? $row[$name] : null;
         if (lookup_table_for_column($name) !== null && $val !== null && $val !== '') {
             $dd = htmlspecialchars(lookup_label_for_field($name, $val));
         } else {
@@ -328,7 +309,7 @@ function render_field_list(array $columns, ?array $row, string $skipColumn = 'ru
         }
         $errName = $name . '_err';
         if (isset($colNameSet[$errName])) {
-            $err = $row[$errName] ?? null;
+            $err = isset($row[$errName]) ? $row[$errName] : null;
             if ($err !== null && $err !== '') {
                 $dd .= ' ± ' . fmt_value($err);
             }
@@ -343,8 +324,7 @@ function render_field_list(array $columns, ?array $row, string $skipColumn = 'ru
 /**
  * Load lookup-table maps from includes/layouts/layout_lookups.php (cached per request).
  */
-function get_lookup_layouts(): array
-{
+function get_lookup_layouts(){
     static $layouts = null;
     if ($layouts === null) {
         $layouts = require __DIR__ . '/layouts/layout_lookups.php';
@@ -352,9 +332,8 @@ function get_lookup_layouts(): array
     return $layouts;
 }
 
-function lookup_table_for_column(string $column): ?string
-{
-    $name = get_lookup_layouts()['columns'][$column] ?? null;
+function lookup_table_for_column($column){
+    $name = (($__lk = get_lookup_layouts()) && isset($__lk['columns'][$column]) ? $__lk['columns'][$column] : null);
     return is_string($name) && $name !== '' ? $name : null;
 }
 
@@ -363,8 +342,7 @@ function lookup_table_for_column(string $column): ?string
  *
  * @return array<string, string>
  */
-function load_lookup_map(PDO $pdo, string $table): array
-{
+function load_lookup_map($pdo, $table){
     static $cache = [];
     if (array_key_exists($table, $cache)) {
         return $cache[$table];
@@ -372,11 +350,11 @@ function load_lookup_map(PDO $pdo, string $table): array
     if (!table_exists($pdo, $table)) {
         return $cache[$table] = [];
     }
-    $cfg = get_lookup_layouts()['tables'][$table] ?? [];
-    $codeCol = preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)($cfg['code'] ?? 'code'))
-        ? (string)($cfg['code'] ?? 'code') : 'code';
-    $labelCol = preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)($cfg['label'] ?? 'display_label'))
-        ? (string)($cfg['label'] ?? 'display_label') : 'display_label';
+    $cfg = (($__lk = get_lookup_layouts()) && isset($__lk['tables'][$table]) ? $__lk['tables'][$table] : []);
+    $codeCol = preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)(isset($cfg['code']) ? $cfg['code'] : 'code'))
+        ? (string)(isset($cfg['code']) ? $cfg['code'] : 'code') : 'code';
+    $labelCol = preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', (string)(isset($cfg['label']) ? $cfg['label'] : 'display_label'))
+        ? (string)(isset($cfg['label']) ? $cfg['label'] : 'display_label') : 'display_label';
     if (!preg_match('/^[A-Za-z_][A-Za-z0-9_]*$/', $table)) {
         return $cache[$table] = [];
     }
@@ -393,8 +371,7 @@ function load_lookup_map(PDO $pdo, string $table): array
     return $cache[$table] = $map;
 }
 
-function lookup_label_for_field(string $field, $code): string
-{
+function lookup_label_for_field($field, $code){
     if ($code === null || $code === '') {
         return '';
     }
@@ -403,19 +380,18 @@ function lookup_label_for_field(string $field, $code): string
     if ($table === null) {
         return $code;
     }
-    $pdo = $GLOBALS['pdo'] ?? null;
+    $pdo = isset($GLOBALS['pdo']) ? $GLOBALS['pdo'] : null;
     if (!($pdo instanceof PDO)) {
         return $code;
     }
     $map = load_lookup_map($pdo, $table);
-    return $map[$code] ?? $code;
+    return isset($map[$code]) ? $map[$code] : $code;
 }
 
 /**
  * Load master navbar layout from includes/layouts/layout_navbar.php (cached).
  */
-function get_navbar_layout(): array
-{
+function get_navbar_layout(){
     static $layout = null;
     if ($layout === null) {
         $layout = require __DIR__ . '/layouts/layout_navbar.php';
@@ -431,10 +407,9 @@ function get_navbar_layout(): array
  * No output when layout_navbar.php has an empty links list.
  * Colors come from CSS variables in assets/style.css (see layout_navbar.php header).
  */
-function render_site_navbar(): void
-{
+function render_site_navbar(){
     $nav = get_navbar_layout();
-    $rawLinks = $nav['links'] ?? [];
+    $rawLinks = isset($nav['links']) ? $nav['links'] : [];
     if (!is_array($rawLinks) || $rawLinks === []) {
         return;
     }
@@ -444,8 +419,8 @@ function render_site_navbar(): void
         if (!is_array($entry)) {
             continue;
         }
-        $href  = trim((string)($entry['href'] ?? ''));
-        $label = trim((string)($entry['label'] ?? ''));
+        $href  = trim((string)(isset($entry['href']) ? $entry['href'] : ''));
+        $label = trim((string)(isset($entry['label']) ? $entry['label'] : ''));
         if ($href === '' || $label === '') {
             continue;
         }
@@ -469,8 +444,7 @@ function render_site_navbar(): void
 /**
  * Load list-card layouts from includes/layouts/layout_cards.php (cached per request).
  */
-function get_card_layouts(): array
-{
+function get_card_layouts(){
     static $layouts = null;
     if ($layouts === null) {
         $layouts = require __DIR__ . '/layouts/layout_cards.php';
@@ -481,8 +455,7 @@ function get_card_layouts(): array
 /**
  * Load run/group summary layouts from includes/layouts/layout_run_summary.php.
  */
-function get_run_summary_layouts(): array
-{
+function get_run_summary_layouts(){
     static $layouts = null;
     if ($layouts === null) {
         $layouts = require __DIR__ . '/layouts/layout_run_summary.php';
@@ -495,24 +468,23 @@ function get_run_summary_layouts(): array
  *
  * @param array{empty_start?:string,empty_end?:string} $options
  */
-function summary_cell_value_html(array $cell, array $data, array $options = []): ?string
-{
-    $kind = $cell['kind'] ?? '';
+function summary_cell_value_html($cell, $data, $options = []){
+    $kind = isset($cell['kind']) ? $cell['kind'] : '';
     switch ($kind) {
         case 'text':
-            $raw = $data[$cell['field'] ?? ''] ?? null;
+            $raw = isset($data[isset($cell['field']) ? $cell['field'] : '']) ? $data[isset($cell['field']) ? $cell['field'] : ''] : null;
             if ($raw === null || $raw === '') {
                 $text = '—';
             } else {
-                $field = (string)($cell['field'] ?? '');
+                $field = (string)(isset($cell['field']) ? $cell['field'] : '');
                 $label = lookup_label_for_field($field, $raw);
                 $text = $label !== '' ? $label : soft_wrap_commas((string)$raw);
             }
             return htmlspecialchars($text);
 
         case 'quality':
-            $field = (string)($cell['field'] ?? '');
-            $raw = $data[$field] ?? null;
+            $field = (string)(isset($cell['field']) ? $cell['field'] : '');
+            $raw = isset($data[$field]) ? $data[$field] : null;
             if ($raw === null || $raw === '') {
                 return '—';
             }
@@ -523,14 +495,14 @@ function summary_cell_value_html(array $cell, array $data, array $options = []):
                 . htmlspecialchars($text) . '</span>';
 
         case 'id':
-            $field = $cell['field'] ?? '';
-            $raw = $data[$field] ?? null;
+            $field = isset($cell['field']) ? $cell['field'] : '';
+            $raw = isset($data[$field]) ? $data[$field] : null;
             if ($raw === null || $raw === '') {
                 return '—';
             }
-            $prefix = $cell['prefix'] ?? '';
+            $prefix = isset($cell['prefix']) ? $cell['prefix'] : '';
             $text = htmlspecialchars($prefix . (string)$raw);
-            $linkKey = $cell['link'] ?? null;
+            $linkKey = isset($cell['link']) ? $cell['link'] : null;
             if (is_string($linkKey) && $linkKey !== '') {
                 $href = list_table_column_href($linkKey, $cell, $data);
                 if ($href !== null) {
@@ -540,14 +512,14 @@ function summary_cell_value_html(array $cell, array $data, array $options = []):
             return $text;
 
         case 'time_range':
-            $startRaw = $data[$cell['start'] ?? ''] ?? null;
-            $endRaw   = $data[$cell['end'] ?? ''] ?? null;
+            $startRaw = isset($data[isset($cell['start']) ? $cell['start'] : '']) ? $data[isset($cell['start']) ? $cell['start'] : ''] : null;
+            $endRaw   = isset($data[isset($cell['end']) ? $cell['end'] : '']) ? $data[isset($cell['end']) ? $cell['end'] : ''] : null;
             $start = ($startRaw !== null && trim((string)$startRaw) !== '')
                 ? (string)$startRaw
-                : (string)($options['empty_start'] ?? '—');
+                : (string)(isset($options['empty_start']) ? $options['empty_start'] : '—');
             $end = ($endRaw !== null && trim((string)$endRaw) !== '')
                 ? (string)$endRaw
-                : (string)($options['empty_end'] ?? '—');
+                : (string)(isset($options['empty_end']) ? $options['empty_end'] : '—');
             return '<span class="run-summary-time">'
                 . htmlspecialchars($start)
                 . ' &rarr; '
@@ -555,7 +527,7 @@ function summary_cell_value_html(array $cell, array $data, array $options = []):
                 . '</span>';
 
         case 'comment':
-            $raw = $data[$cell['field'] ?? ''] ?? null;
+            $raw = isset($data[isset($cell['field']) ? $cell['field'] : '']) ? $data[isset($cell['field']) ? $cell['field'] : ''] : null;
             if ($raw === null || trim((string)$raw) === '') {
                 return null;
             }
@@ -572,15 +544,14 @@ function summary_cell_value_html(array $cell, array $data, array $options = []):
  *
  * @param array{empty_start?:string,empty_end?:string} $options
  */
-function render_run_summary(array $data, string $layoutKey = 'run', array $options = []): void
-{
+function render_run_summary($data, $layoutKey = 'run', $options = []){
     $layouts = get_run_summary_layouts();
     if (!isset($layouts[$layoutKey])) {
         return;
     }
     $layout = $layouts[$layoutKey];
-    $rows = $layout['rows'] ?? [];
-    $footer = $layout['footer'] ?? [];
+    $rows = isset($layout['rows']) ? $layout['rows'] : [];
+    $footer = isset($layout['footer']) ? $layout['footer'] : [];
 
     echo '<div class="run-summary">';
 
@@ -597,7 +568,7 @@ function render_run_summary(array $data, string $layoutKey = 'run', array $optio
             if ($html === null) {
                 continue;
             }
-            $cells[] = ['label' => (string)($cell['label'] ?? ''), 'html' => $html];
+            $cells[] = ['label' => (string)(isset($cell['label']) ? $cell['label'] : ''), 'html' => $html];
         }
         if ($cells === []) {
             continue;
@@ -623,7 +594,7 @@ function render_run_summary(array $data, string $layoutKey = 'run', array $optio
         if ($html === null) {
             continue;
         }
-        $label = (string)($cell['label'] ?? '');
+        $label = (string)(isset($cell['label']) ? $cell['label'] : '');
         echo '<div class="run-summary-comment">';
         if ($label !== '') {
             echo '<div class="run-summary-comment-label">' . htmlspecialchars($label) . '</div>';
@@ -640,22 +611,21 @@ function render_run_summary(array $data, string $layoutKey = 'run', array $optio
  * Optional extra CSS class is owned by the caller (app), not the layout.
  * Cell links use optional 'link' => 'run'|'group' on the cell (same as tables).
  */
-function render_list_card(string $layoutKey, array $data, string $extraClass = ''): void
-{
+function render_list_card($layoutKey, $data, $extraClass = ''){
     $layouts = get_card_layouts();
     if (!isset($layouts[$layoutKey])) {
         return;
     }
     $layout = $layouts[$layoutKey];
-    $rows = $layout['rows'] ?? [];
+    $rows = isset($layout['rows']) ? $layout['rows'] : [];
 
     $classes = ['run-card', 'card'];
     if ($extraClass !== '') {
         $classes[] = $extraClass;
     }
-    $borderField = $layout['quality_border'] ?? null;
+    $borderField = isset($layout['quality_border']) ? $layout['quality_border'] : null;
     if (is_string($borderField) && $borderField !== '' && array_key_exists($borderField, $data)) {
-        $classes[] = 'quality-border-' . quality_slug($data[$borderField] ?? null);
+        $classes[] = 'quality-border-' . quality_slug(isset($data[$borderField]) ? $data[$borderField] : null);
     }
 
     echo '<div class="' . htmlspecialchars(implode(' ', $classes)) . '">';
@@ -675,8 +645,7 @@ function render_list_card(string $layoutKey, array $data, string $extraClass = '
     echo '</div>';
 }
 
-function render_list_card_cell(array $cell, array $data): void
-{
+function render_list_card_cell($cell, $data){
     $html = list_cell_with_optional_link($cell, $data);
     if ($html === null) {
         return;
@@ -688,8 +657,7 @@ function render_list_card_cell(array $cell, array $data): void
  * Shared cell HTML for list cards and list tables. Returns null for unknown kinds.
  * Output is already escaped.
  */
-function list_cell_html(array $cell, array $data): ?string
-{
+function list_cell_html($cell, $data){
     if (!isset($cell['kind'])) {
         return null;
     }
@@ -698,19 +666,19 @@ function list_cell_html(array $cell, array $data): ?string
 
     switch ($kind) {
         case 'id':
-            $field = $cell['field'] ?? '';
-            $raw = $data[$field] ?? null;
+            $field = isset($cell['field']) ? $cell['field'] : '';
+            $raw = isset($data[$field]) ? $data[$field] : null;
             if ($raw === null || $raw === '') {
                 $text = '—';
             } else {
-                $prefix = $cell['prefix'] ?? '';
+                $prefix = isset($cell['prefix']) ? $cell['prefix'] : '';
                 $text = $prefix . $raw;
             }
             return '<span' . $class . '>' . htmlspecialchars((string)$text) . '</span>';
 
         case 'quality':
-            $field = $cell['field'] ?? '';
-            $raw = $data[$field] ?? null;
+            $field = isset($cell['field']) ? $cell['field'] : '';
+            $raw = isset($data[$field]) ? $data[$field] : null;
             if ($raw === null || $raw === '') {
                 return '<span' . $class . '>—</span>';
             }
@@ -720,8 +688,8 @@ function list_cell_html(array $cell, array $data): ?string
                 . htmlspecialchars($label !== '' ? $label : (string)$raw) . '</span>';
 
         case 'text':
-            $field = $cell['field'] ?? '';
-            $raw = $data[$field] ?? null;
+            $field = isset($cell['field']) ? $cell['field'] : '';
+            $raw = isset($data[$field]) ? $data[$field] : null;
             if ($raw === null || $raw === '') {
                 $text = '—';
             } else {
@@ -731,8 +699,8 @@ function list_cell_html(array $cell, array $data): ?string
             return '<span' . $class . '>' . htmlspecialchars($text) . '</span>';
 
         case 'time_range':
-            $start = $data[$cell['start'] ?? ''] ?? null;
-            $end   = $data[$cell['end'] ?? ''] ?? null;
+            $start = isset($data[isset($cell['start']) ? $cell['start'] : '']) ? $data[isset($cell['start']) ? $cell['start'] : ''] : null;
+            $end   = isset($data[isset($cell['end']) ? $cell['end'] : '']) ? $data[isset($cell['end']) ? $cell['end'] : ''] : null;
             return '<span' . $class . '>'
                 . htmlspecialchars(format_time_only($start !== null ? (string)$start : null))
                 . '&nbsp;&ndash;&nbsp;'
@@ -740,10 +708,10 @@ function list_cell_html(array $cell, array $data): ?string
                 . '</span>';
 
         case 'value_err':
-            $field = $cell['field'] ?? '';
-            $val = $data[$field] ?? null;
+            $field = isset($cell['field']) ? $cell['field'] : '';
+            $val = isset($data[$field]) ? $data[$field] : null;
             $dd = fmt_value($val);
-            $err = $data[$field . '_err'] ?? null;
+            $err = isset($data[$field . '_err']) ? $data[$field . '_err'] : null;
             if ($err !== null && $err !== '') {
                 $dd .= ' ± ' . fmt_value($err);
             }
@@ -754,21 +722,18 @@ function list_cell_html(array $cell, array $data): ?string
     }
 }
 
-function render_run_card(array $run): void
-{
+function render_run_card($run){
     render_list_card('run', $run);
 }
 
-function render_group_card(array $card): void
-{
+function render_group_card($card){
     render_list_card('group', $card, 'group-card');
 }
 
 /**
  * Load list-table layouts from includes/layouts/layout_tables.php (cached per request).
  */
-function get_table_layouts(): array
-{
+function get_table_layouts(){
     static $layouts = null;
     if ($layouts === null) {
         $layouts = require __DIR__ . '/layouts/layout_tables.php';
@@ -780,32 +745,33 @@ function get_table_layouts(): array
  * Resolve a table-column link key to an href, or null if not linkable.
  * Keys: 'run' → detail_runs, 'group' → detail_groups. Value comes from the column's field.
  */
-function list_table_column_href(string $linkKey, array $col, array $data): ?string
-{
-    $field = $col['field'] ?? '';
-    $raw = $data[$field] ?? null;
+function list_table_column_href($linkKey, $col, $data){
+    $field = isset($col['field']) ? $col['field'] : '';
+    $raw = isset($data[$field]) ? $data[$field] : null;
     if ($raw === null || $raw === '') {
         return null;
     }
     $id = (int)$raw;
-    return match ($linkKey) {
-        'run'   => 'detail_runs.php?run=' . $id,
-        'group' => 'detail_groups.php?group=' . $id,
-        default => null,
-    };
+    switch ($linkKey) {
+        case 'run':
+            return 'detail_runs.php?run=' . $id;
+        case 'group':
+            return 'detail_groups.php?group=' . $id;
+        default:
+            return null;
+    }
 }
 
 /**
  * list_cell_html() plus optional 'link' => 'run'|'group' wrapper.
  * Empty / unlinkable values stay unwrapped ("—").
  */
-function list_cell_with_optional_link(array $cell, array $data): ?string
-{
+function list_cell_with_optional_link($cell, $data){
     $html = list_cell_html($cell, $data);
     if ($html === null) {
         return null;
     }
-    $linkKey = $cell['link'] ?? null;
+    $linkKey = isset($cell['link']) ? $cell['link'] : null;
     $href = (is_string($linkKey) && $linkKey !== '')
         ? list_table_column_href($linkKey, $cell, $data)
         : null;
@@ -819,24 +785,23 @@ function list_cell_with_optional_link(array $cell, array $data): ?string
  * Render a date-bucket (or any list) as a table from includes/layouts/layout_tables.php.
  * Columns with link => 'run'|'group' become anchors; URLs are resolved here.
  */
-function render_list_table(string $layoutKey, array $rows): void
-{
+function render_list_table($layoutKey, $rows){
     $layouts = get_table_layouts();
     if (!isset($layouts[$layoutKey]) || !$rows) {
         return;
     }
     $layout = $layouts[$layoutKey];
-    $columns = $layout['columns'] ?? [];
+    $columns = isset($layout['columns']) ? $layout['columns'] : [];
     if (!$columns) {
         return;
     }
 
-    $borderField = $layout['quality_border'] ?? null;
+    $borderField = isset($layout['quality_border']) ? $layout['quality_border'] : null;
 
     echo '<div class="list-table-wrap"><table class="list-table">';
     echo '<thead><tr>';
     foreach ($columns as $col) {
-        $header = $col['header'] ?? '';
+        $header = isset($col['header']) ? $col['header'] : '';
         echo '<th>' . htmlspecialchars((string)$header) . '</th>';
     }
     echo '</tr></thead><tbody>';
@@ -844,7 +809,7 @@ function render_list_table(string $layoutKey, array $rows): void
     foreach ($rows as $data) {
         $classes = ['list-table-row'];
         if (is_string($borderField) && $borderField !== '' && array_key_exists($borderField, $data)) {
-            $classes[] = 'quality-border-' . quality_slug($data[$borderField] ?? null);
+            $classes[] = 'quality-border-' . quality_slug(isset($data[$borderField]) ? $data[$borderField] : null);
         }
 
         echo '<tr class="' . htmlspecialchars(implode(' ', $classes)) . '">';
@@ -862,12 +827,10 @@ function render_list_table(string $layoutKey, array $rows): void
     echo '</tbody></table></div>';
 }
 
-function render_run_table(array $rows): void
-{
+function render_run_table($rows){
     render_list_table('run', $rows);
 }
 
-function render_group_table(array $rows): void
-{
+function render_group_table($rows){
     render_list_table('group', $rows);
 }

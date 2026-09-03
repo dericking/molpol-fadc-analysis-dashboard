@@ -56,8 +56,8 @@
           <option value="">Run Types</option>
           <?php foreach ($types as $t): ?>
             <?php
-              $typeCode  = is_array($t) ? (string)($t['code'] ?? '') : (string)$t;
-              $typeLabel = is_array($t) ? (string)($t['label'] ?? $typeCode) : (string)$t;
+              $typeCode  = is_array($t) ? (string)(isset($t['code']) ? $t['code'] : '') : (string)$t;
+              $typeLabel = is_array($t) ? (string)(isset($t['label']) ? $t['label'] : $typeCode) : (string)$t;
             ?>
             <option value="<?= htmlspecialchars($typeCode) ?>" <?= $typeCode === $filterType ? 'selected' : '' ?>>
               <?= htmlspecialchars($typeLabel !== '' ? $typeLabel : $typeCode) ?>
@@ -82,9 +82,9 @@
         <h2 class="panel-heading">Dates From–To</h2>
       </div>
       <div class="top-nav-row">
-        <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars($filterDateFrom ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
+        <input type="date" name="from" aria-label="From" value="<?= htmlspecialchars(isset($filterDateFrom) ? $filterDateFrom : '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
       </div>
       <div class="top-nav-row">
-        <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars($filterDateTo ?? '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
+        <input type="date" name="to" aria-label="To" value="<?= htmlspecialchars(isset($filterDateTo) ? $filterDateTo : '') ?>" data-autosubmit <?= $dateColumnMissing ? 'disabled' : '' ?>>
       </div>
     </div>

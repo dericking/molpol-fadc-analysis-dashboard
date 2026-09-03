@@ -7,7 +7,7 @@
  * Covers pure helpers in schema.php + render_helpers.php. Exit 0 on PASS.
  */
 
-declare(strict_types=1);
+
 
 require_once __DIR__ . '/../includes/schema.php';
 require_once __DIR__ . '/../includes/render_helpers.php';
@@ -15,8 +15,7 @@ require_once __DIR__ . '/../includes/render_helpers.php';
 $failures = 0;
 $passed = 0;
 
-function assert_eq($expected, $actual, string $label): void
-{
+function assert_eq($expected, $actual, $label){
     global $failures, $passed;
     if ($expected === $actual) {
         $passed++;
@@ -29,8 +28,7 @@ function assert_eq($expected, $actual, string $label): void
     echo "  actual:   " . var_export($actual, true) . "\n";
 }
 
-function assert_true(bool $cond, string $label): void
-{
+function assert_true($cond, $label){
     assert_eq(true, $cond, $label);
 }
 
@@ -38,15 +36,15 @@ echo "Unit harness\n\n";
 
 // --- dates -----------------------------------------------------------------
 $iso = parse_stored_calendar_date('2026-07-31 16:54:21');
-assert_eq('2026-07-31', $iso['key'] ?? null, 'ISO stamp → key');
-assert_eq('Friday, July 31, 2026', $iso['label'] ?? null, 'ISO stamp → label');
+assert_eq('2026-07-31', isset($iso['key']) ? $iso['key'] : null, 'ISO stamp → key');
+assert_eq('Friday, July 31, 2026', isset($iso['label']) ? $iso['label'] : null, 'ISO stamp → label');
 
 $linux = parse_stored_calendar_date('Fri Jul 31 16:54:21 EDT 2026');
-assert_eq('2026-07-31', $linux['key'] ?? null, 'Linux date → key');
-assert_eq('Friday, July 31, 2026', $linux['label'] ?? null, 'Linux date → label');
+assert_eq('2026-07-31', isset($linux['key']) ? $linux['key'] : null, 'Linux date → key');
+assert_eq('Friday, July 31, 2026', isset($linux['label']) ? $linux['label'] : null, 'Linux date → label');
 
 $pad = parse_stored_calendar_date('Fri Jul  4 16:54:21 EDT 2026');
-assert_eq('2026-07-04', $pad['key'] ?? null, 'Linux date space-padded day → key');
+assert_eq('2026-07-04', isset($pad['key']) ? $pad['key'] : null, 'Linux date space-padded day → key');
 
 assert_eq(null, parse_stored_calendar_date(''), 'empty stamp → null');
 assert_eq(null, parse_stored_calendar_date(null), 'null stamp → null');
@@ -60,8 +58,8 @@ assert_eq('16:54:21', format_time_only('Fri Jul 31 16:54:21 EDT 2026'), 'format_
 assert_eq('—', format_time_only(null), 'format_time_only null');
 
 $sql = sql_expr_stamp_as_date('r.run_start');
-assert_true(str_contains($sql, '`r`.`run_start`'), 'sql_expr qualifies alias.column');
-assert_true(str_contains($sql, 'STR_TO_DATE'), 'sql_expr has Linux branch');
+assert_true((strpos($sql, '`r`.`run_start`') !== false), 'sql_expr qualifies alias.column');
+assert_true((strpos($sql, 'STR_TO_DATE') !== false), 'sql_expr has Linux branch');
 assert_eq('NULL', sql_expr_stamp_as_date('r; drop'), 'sql_expr rejects junk identifier');
 
 // --- schema comment helpers ------------------------------------------------

@@ -8,7 +8,7 @@
 /**
  * Normalize a path/URL base to end with a single trailing slash (or empty).
  */
-function plots_base_slash(string $base): string
+function plots_base_slash($base)
 {
     $base = trim($base);
     if ($base === '') {
@@ -26,7 +26,7 @@ function plots_base_slash(string $base): string
  *   missing_id — plots base is OK; this id's subfolder was never created
  *   bad_base   — base unusable / missing / unreadable, or id dir unreadable
  */
-function resolve_plots_directory(string $fsBase, string $webBase, int $id): array
+function resolve_plots_directory($fsBase, $webBase, $id)
 {
     $subdir = (string)$id;
     $fsBase = trim($fsBase);
@@ -39,38 +39,38 @@ function resolve_plots_directory(string $fsBase, string $webBase, int $id): arra
     } else {
         $webBase = trim($webBase);
         if ($webBase === '' || preg_match('#^https?://#i', $webBase)) {
-            return ['status' => 'bad_base', 'dir' => null];
+            return array('status' => 'bad_base', 'dir' => null);
         }
-        $docRoot = rtrim((string)($_SERVER['DOCUMENT_ROOT'] ?? ''), "/\\");
+        $docRoot = rtrim((string)(isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] : ''), "/\\");
         if ($docRoot === '') {
-            return ['status' => 'bad_base', 'dir' => null];
+            return array('status' => 'bad_base', 'dir' => null);
         }
         $path = parse_url($webBase, PHP_URL_PATH);
         if (!is_string($path) || $path === '') {
             $path = $webBase;
         }
-        $rel = trim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
+        $rel = trim(str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, $path), DIRECTORY_SEPARATOR);
         $baseDir = $docRoot . DIRECTORY_SEPARATOR . $rel;
         $dir = $baseDir . DIRECTORY_SEPARATOR . $subdir;
     }
 
     if ($baseDir === null || $dir === null || !is_dir($baseDir) || !is_readable($baseDir)) {
-        return ['status' => 'bad_base', 'dir' => null];
+        return array('status' => 'bad_base', 'dir' => null);
     }
     if (!is_dir($dir)) {
-        return ['status' => 'missing_id', 'dir' => null];
+        return array('status' => 'missing_id', 'dir' => null);
     }
     if (!is_readable($dir)) {
-        return ['status' => 'bad_base', 'dir' => null];
+        return array('status' => 'bad_base', 'dir' => null);
     }
-    return ['status' => 'ok', 'dir' => $dir];
+    return array('status' => 'ok', 'dir' => $dir);
 }
 
 /**
  * List image files in a plots directory, alphanumeric (natural) order.
  * @return list<string> basenames only
  */
-function list_plot_image_files(string $dir): array
+function list_plot_image_files($dir)
 {
     // Raster formats only. SVG is deliberately absent: it can carry script,
     // and the gallery links each plot directly, so clicking one would open it
@@ -78,11 +78,11 @@ function list_plot_image_files(string $dir): array
     // so a renamed SVG is declared image/* and never executes. ROOT can emit
     // SVG (SaveAs("plot.svg")) — do not add it back without also changing how
     // the plot is linked.
-    $allowed = ['png', 'jpg', 'jpeg', 'gif', 'webp'];
-    $files = [];
+    $allowed = array('png', 'jpg', 'jpeg', 'gif', 'webp');
+    $files = array();
     $entries = @scandir($dir);
     if ($entries === false) {
-        return [];
+        return array();
     }
     foreach ($entries as $name) {
         if ($name === '.' || $name === '..') {
@@ -111,12 +111,12 @@ function list_plot_image_files(string $dir): array
  * - id dir OK but no images → soft “No plots available.”
  * - Otherwise images in alphanumeric order under web_base/{id}/
  */
-function render_analysis_plots(array $config, string $kind, int $id): void
+function render_analysis_plots($config, $kind, $id)
 {
     $webKey = $kind === 'group' ? 'group_plots_web_base' : 'run_plots_web_base';
     $fsKey  = $kind === 'group' ? 'group_plots_fs_base' : 'run_plots_fs_base';
-    $webBase = plots_base_slash((string)($config[$webKey] ?? ''));
-    $fsBase  = (string)($config[$fsKey] ?? '');
+    $webBase = plots_base_slash((string)(isset($config[$webKey]) ? $config[$webKey] : ''));
+    $fsBase  = (string)(isset($config[$fsKey]) ? $config[$fsKey] : '');
 
     $resolved = resolve_plots_directory($fsBase, $webBase, $id);
     if ($resolved['status'] === 'bad_base') {
@@ -128,7 +128,7 @@ function render_analysis_plots(array $config, string $kind, int $id): void
         return;
     }
 
-    $dir = $resolved['dir'] ?? null;
+    $dir = isset($resolved['dir']) ? $resolved['dir'] : null;
     if ($dir === null) {
         render_status_message('plot_bad_base');
         return;

@@ -19,7 +19,7 @@
  *
  * @return array<int, array{name:string, type:string, comment:string, label:string, pv:?string}>
  */
-function get_table_columns(PDO $pdo, string $table): array
+function get_table_columns(PDO $pdo, $table)
 {
     $stmt = $pdo->prepare(
         'SELECT COLUMN_NAME, DATA_TYPE, COLUMN_TYPE, COLUMN_COMMENT
@@ -27,19 +27,19 @@ function get_table_columns(PDO $pdo, string $table): array
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table
          ORDER BY ORDINAL_POSITION'
     );
-    $stmt->execute(['table' => $table]);
+    $stmt->execute(array('table' => $table));
 
-    $columns = [];
+    $columns = array();
     foreach ($stmt->fetchAll() as $row) {
-        $comment = $row['COLUMN_COMMENT'] ?? '';
-        $columns[] = [
+        $comment = isset($row['COLUMN_COMMENT']) ? $row['COLUMN_COMMENT'] : '';
+        $columns[] = array(
             'name'        => $row['COLUMN_NAME'],
             'type'        => $row['DATA_TYPE'],   // e.g. 'float', 'enum', 'varchar'
             'column_type' => $row['COLUMN_TYPE'], // e.g. 'float(10,5)', "enum('Good','Bad',...)"
             'comment'     => $comment,
             'label'       => parse_comment_label($comment, $row['COLUMN_NAME']),
             'pv'          => parse_comment_pv($comment),
-        ];
+        );
     }
     return $columns;
 }
@@ -48,10 +48,10 @@ function get_table_columns(PDO $pdo, string $table): array
  * True if $table in the current database has a column named $column.
  * Used to skip SQL that names a column (e.g. index type DISTINCT) instead of 500ing.
  */
-function table_has_column(PDO $pdo, string $table, string $column): bool
+function table_has_column(PDO $pdo, $table, $column)
 {
     foreach (get_table_columns($pdo, $table) as $col) {
-        if (($col['name'] ?? '') === $column) {
+        if ((isset($col['name']) ? $col['name'] : '') === $column) {
             return true;
         }
     }
@@ -61,13 +61,13 @@ function table_has_column(PDO $pdo, string $table, string $column): bool
 /**
  * True if $table exists in the current database.
  */
-function table_exists(PDO $pdo, string $table): bool
+function table_exists(PDO $pdo, $table)
 {
     $stmt = $pdo->prepare(
         'SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES
          WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :table'
     );
-    $stmt->execute(['table' => $table]);
+    $stmt->execute(array('table' => $table));
     return (int)$stmt->fetchColumn() > 0;
 }
 
@@ -76,7 +76,7 @@ function table_exists(PDO $pdo, string $table): bool
  * Strip the trailing [PV: ...] bracket to get a clean display label.
  * Falls back to a humanized column name if there's no comment.
  */
-function parse_comment_label(string $comment, string $fallbackColumnName): string
+function parse_comment_label($comment, $fallbackColumnName)
 {
     if ($comment === '') {
         return humanize_column_name($fallbackColumnName);
@@ -90,8 +90,10 @@ function parse_comment_label(string $comment, string $fallbackColumnName): strin
  * Pull the EPICS PV name out of a comment, if present.
  * Tolerant of the one malformed comment in the current schema
  * (epics_las_pow_halld is missing its closing bracket).
+ *
+ * @return string|null
  */
-function parse_comment_pv(string $comment): ?string
+function parse_comment_pv($comment)
 {
     if (preg_match('/\[PV:\s*([^\]]*)\]?/i', $comment, $m)) {
         return trim($m[1], " \t\n\r\0\x0B]");
@@ -103,7 +105,7 @@ function parse_comment_pv(string $comment): ?string
  * epics_bcm_avg -> "Bcm Avg" (strip epics_ prefix, underscores to spaces, title case)
  * Only used when a column has no COMMENT to draw a label from.
  */
-function humanize_column_name(string $name): string
+function humanize_column_name($name)
 {
     $name = preg_replace('/^epics_/', '', $name);
     return ucwords(str_replace('_', ' ', $name));
@@ -112,14 +114,16 @@ function humanize_column_name(string $name): string
 /**
  * Fetch one row from $table by its primary key column, keyed by column name.
  * Returns null if no matching row (e.g. a run has no DAQ_config entry yet).
+ *
+ * @return array|null
  */
-function fetch_row_by_key(PDO $pdo, string $table, string $keyColumn, $keyValue): ?array
+function fetch_row_by_key(PDO $pdo, $table, $keyColumn, $keyValue)
 {
     // Table/column names are never user input here — they come from get_table_columns()
     // or fixed constants — so this interpolation is safe; the value itself is bound.
     $sql = "SELECT * FROM `{$table}` WHERE `{$keyColumn}` = :key LIMIT 1";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute(['key' => $keyValue]);
+    $stmt->execute(array('key' => $keyValue));
     $row = $stmt->fetch();
-    return $row ?: null;
+    return $row ? $row : null;
 }

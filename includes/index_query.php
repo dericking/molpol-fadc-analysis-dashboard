@@ -14,27 +14,27 @@
  * $qs, $dateBuckets, $clearHref, $filtersActive, $siteTitle.
  */
 
-$filterType  = $_GET['type'] ?? '';
-$filterExperiment = trim((string)($_GET['experiment'] ?? ''));
-$filterDateFrom = parse_ymd_query_param($_GET['from'] ?? '');
-$filterDateTo   = parse_ymd_query_param($_GET['to'] ?? '');
+$filterType  = isset($_GET['type']) ? $_GET['type'] : '';
+$filterExperiment = trim((string)(isset($_GET['experiment']) ? $_GET['experiment'] : ''));
+$filterDateFrom = parse_ymd_query_param(isset($_GET['from']) ? $_GET['from'] : '');
+$filterDateTo   = parse_ymd_query_param(isset($_GET['to']) ? $_GET['to'] : '');
 if ($filterDateFrom !== null && $filterDateTo !== null && $filterDateFrom > $filterDateTo) {
     [$filterDateFrom, $filterDateTo] = [$filterDateTo, $filterDateFrom];
 }
-$runSearch   = trim((string)($_GET['run'] ?? ''));
-$groupSearch = trim((string)($_GET['group'] ?? ''));
+$runSearch   = trim((string)(isset($_GET['run']) ? $_GET['run'] : ''));
+$groupSearch = trim((string)(isset($_GET['group']) ? $_GET['group'] : ''));
 $filterRun   = ($runSearch !== '' && ctype_digit($runSearch)) ? (int)$runSearch : null;
 $filterGroup = ($groupSearch !== '' && ctype_digit($groupSearch)) ? (int)$groupSearch : null;
-$findRaw = (string)($_GET['find'] ?? '');
+$findRaw = (string)(isset($_GET['find']) ? $_GET['find'] : '');
 $find = ($findRaw === 'run' || $findRaw === 'group') ? $findRaw : '';
 
-$defaultView   = ($config['default_view'] ?? 'runs') === 'groups' ? 'groups' : 'runs';
-$defaultLayout = ($config['default_layout'] ?? 'table') === 'cards' ? 'cards' : 'table';
-$defaultPanel  = ($config['default_panel'] ?? 'top') === 'side' ? 'side' : 'top';
+$defaultView   = (isset($config['default_view']) ? $config['default_view'] : 'runs') === 'groups' ? 'groups' : 'runs';
+$defaultLayout = (isset($config['default_layout']) ? $config['default_layout'] : 'table') === 'cards' ? 'cards' : 'table';
+$defaultPanel  = (isset($config['default_panel']) ? $config['default_panel'] : 'top') === 'side' ? 'side' : 'top';
 
-$view   = ($_GET['view'] ?? $defaultView) === 'groups' ? 'groups' : 'runs';
-$layout = ($_GET['layout'] ?? $defaultLayout) === 'table' ? 'table' : 'cards';
-$panel  = ($_GET['panel'] ?? $defaultPanel) === 'side' ? 'side' : 'top';
+$view   = (isset($_GET['view']) ? $_GET['view'] : $defaultView) === 'groups' ? 'groups' : 'runs';
+$layout = (isset($_GET['layout']) ? $_GET['layout'] : $defaultLayout) === 'table' ? 'table' : 'cards';
+$panel  = (isset($_GET['panel']) ? $_GET['panel'] : $defaultPanel) === 'side' ? 'side' : 'top';
 
 if ($find === 'run') {
     $view = 'runs';
@@ -48,7 +48,7 @@ if ($find === 'run') {
     $view = 'groups';
 }
 
-$rowCap = max(1, (int)($config['row_cap'] ?? 300));
+$rowCap = max(1, (int)(isset($config['row_cap']) ? $config['row_cap'] : 300));
 
 $typeTable  = $view === 'groups' ? 'Grouped_Analysis' : 'Run_info';
 $typeColumn = $view === 'groups' ? 'group_type' : 'run_type';
@@ -176,34 +176,34 @@ if ($hasExperimentColumn) {
     }
 }
 
-$qs = function (array $overrides) use ($defaultView, $defaultLayout, $defaultPanel): string {
+$qs = function ($overrides) use ($defaultView, $defaultLayout, $defaultPanel {
     $merged = array_merge([
-        'view'        => $_GET['view'] ?? $defaultView,
-        'layout'      => $_GET['layout'] ?? $defaultLayout,
-        'panel'       => $_GET['panel'] ?? $defaultPanel,
-        'type'        => $_GET['type'] ?? '',
-        'experiment'  => $_GET['experiment'] ?? '',
-        'from'        => $_GET['from'] ?? '',
-        'to'          => $_GET['to'] ?? '',
-        'run'         => $_GET['run'] ?? '',
-        'group'       => $_GET['group'] ?? '',
+        'view'        => isset($_GET['view']) ? $_GET['view'] : $defaultView,
+        'layout'      => isset($_GET['layout']) ? $_GET['layout'] : $defaultLayout,
+        'panel'       => isset($_GET['panel']) ? $_GET['panel'] : $defaultPanel,
+        'type'        => isset($_GET['type']) ? $_GET['type'] : '',
+        'experiment'  => isset($_GET['experiment']) ? $_GET['experiment'] : '',
+        'from'        => isset($_GET['from']) ? $_GET['from'] : '',
+        'to'          => isset($_GET['to']) ? $_GET['to'] : '',
+        'run'         => isset($_GET['run']) ? $_GET['run'] : '',
+        'group'       => isset($_GET['group']) ? $_GET['group'] : '',
     ], $overrides);
-    if (($merged['view'] ?? $defaultView) === $defaultView) {
+    if ((isset($merged['view']) ? $merged['view'] : $defaultView) === $defaultView) {
         unset($merged['view']);
     }
-    if (($merged['layout'] ?? $defaultLayout) === $defaultLayout) {
+    if ((isset($merged['layout']) ? $merged['layout'] : $defaultLayout) === $defaultLayout) {
         unset($merged['layout']);
     }
-    if (($merged['panel'] ?? $defaultPanel) === $defaultPanel) {
+    if ((isset($merged['panel']) ? $merged['panel'] : $defaultPanel) === $defaultPanel) {
         unset($merged['panel']);
     }
-    $query = http_build_query(array_filter($merged, fn($v) => $v !== '' && $v !== null));
+    $query = http_build_query(array_filter($merged, function ($v) { return $v !== '' && $v !== null; }));
     return $query === '' ? '' : ('?' . $query);
 };
 
 $dateBuckets = [];
 foreach ($rows as $row) {
-    $rawTs = $view === 'groups' ? ($row['group_start'] ?? null) : ($row['run_start'] ?? null);
+    $rawTs = $view === 'groups' ? (isset($row['group_start']) ? $row['group_start'] : null) : (isset($row['run_start']) ? $row['run_start'] : null);
     $parsed = parse_stored_calendar_date($rawTs !== null ? (string)$rawTs : null);
     if ($parsed !== null) {
         $dateKey = $parsed['key'];
@@ -238,4 +238,4 @@ $filtersActive = (
     || $filterRun !== null
     || $filterGroup !== null
 );
-$siteTitle = (string)($config['site_title'] ?? 'Møller Run Log');
+$siteTitle = (string)(isset($config['site_title']) ? $config['site_title'] : 'Møller Run Log');

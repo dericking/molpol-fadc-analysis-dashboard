@@ -7,35 +7,37 @@
 
 /**
  * Month abbreviation (Linux date) → 1–12, or null if unknown.
+ *
+ * @return int|null
  */
-function month_abbr_number(string $abbr): ?int
+function month_abbr_number($abbr)
 {
-    static $map = [
+    static $map = array(
         'Jan' => 1, 'Feb' => 2, 'Mar' => 3, 'Apr' => 4,
         'May' => 5, 'Jun' => 6, 'Jul' => 7, 'Aug' => 8,
         'Sep' => 9, 'Oct' => 10, 'Nov' => 11, 'Dec' => 12,
-    ];
-    return $map[$abbr] ?? null;
+    );
+    return isset($map[$abbr]) ? $map[$abbr] : null;
 }
 
 /**
  * Expand a 3-letter weekday/month from a Linux date string for headings.
  */
-function expand_date_abbr(string $abbr, string $kind): string
+function expand_date_abbr($abbr, $kind)
 {
-    static $days = [
+    static $days = array(
         'Sun' => 'Sunday', 'Mon' => 'Monday', 'Tue' => 'Tuesday',
         'Wed' => 'Wednesday', 'Thu' => 'Thursday', 'Fri' => 'Friday', 'Sat' => 'Saturday',
-    ];
-    static $months = [
+    );
+    static $months = array(
         'Jan' => 'January', 'Feb' => 'February', 'Mar' => 'March', 'Apr' => 'April',
         'May' => 'May', 'Jun' => 'June', 'Jul' => 'July', 'Aug' => 'August',
         'Sep' => 'September', 'Oct' => 'October', 'Nov' => 'November', 'Dec' => 'December',
-    ];
+    );
     if ($kind === 'day') {
-        return $days[$abbr] ?? $abbr;
+        return isset($days[$abbr]) ? $days[$abbr] : $abbr;
     }
-    return $months[$abbr] ?? $abbr;
+    return isset($months[$abbr]) ? $months[$abbr] : $abbr;
 }
 
 /**
@@ -44,7 +46,7 @@ function expand_date_abbr(string $abbr, string $kind): string
  *
  * @return array{key: string, label: string}|null  key is Y-m-d for sorting/bucketing
  */
-function parse_stored_calendar_date(?string $value): ?array
+function parse_stored_calendar_date($value)
 {
     if ($value === null) {
         return null;
@@ -58,14 +60,14 @@ function parse_stored_calendar_date(?string $value): ?array
     if (preg_match('/^(\d{4})-(\d{2})-(\d{2})\b/', $value, $m)) {
         $key = $m[1] . '-' . $m[2] . '-' . $m[3];
         // Date-only in UTC: label calendar components without shifting the day.
-        $dt = DateTimeImmutable::createFromFormat('!Y-m-d', $key, new DateTimeZone('UTC'));
+        $dt = DateTime::createFromFormat('!Y-m-d', $key);
         if ($dt === false) {
             return null;
         }
-        return [
+        return array(
             'key'   => $key,
             'label' => $dt->format('l, F j, Y'),
-        ];
+        );
     }
 
     // Linux date: Fri Jul 31 16:54:21 EDT 2026
@@ -82,7 +84,7 @@ function parse_stored_calendar_date(?string $value): ?array
         if ($monNum === null || $day < 1 || $day > 31) {
             return null;
         }
-        return [
+        return array(
             'key'   => sprintf('%s-%02d-%02d', $year, $monNum, $day),
             'label' => sprintf(
                 '%s, %s %d, %s',
@@ -91,7 +93,7 @@ function parse_stored_calendar_date(?string $value): ?array
                 $day,
                 $year
             ),
-        ];
+        );
     }
 
     return null;
@@ -102,7 +104,7 @@ function parse_stored_calendar_date(?string $value): ?array
  * (ISO `Y-m-d…` or Linux `date` text). $column is a trusted identifier,
  * optionally qualified as alias.column (e.g. r.run_start).
  */
-function sql_expr_stamp_as_date(string $column): string
+function sql_expr_stamp_as_date($column)
 {
     if (!preg_match('/^(?:([A-Za-z_][A-Za-z0-9_]*)\.)?([A-Za-z_][A-Za-z0-9_]*)$/', $column, $m)) {
         return 'NULL';
@@ -125,7 +127,7 @@ function sql_expr_stamp_as_date(string $column): string
 }
 
 /** YYYY-MM-DD from a query param, or null if missing/invalid. */
-function parse_ymd_query_param($raw): ?string
+function parse_ymd_query_param($raw)
 {
     $raw = trim((string)$raw);
     if (!preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $raw, $m)) {
@@ -144,7 +146,7 @@ function parse_ymd_query_param($raw): ?string
  * Wall-clock time as written in the stored string (H:i:s), no timezone conversion.
  * Works for Linux date text and "Y-m-d H:i:s".
  */
-function format_time_only(?string $value): string
+function format_time_only($value)
 {
     if ($value === null) {
         return '—';

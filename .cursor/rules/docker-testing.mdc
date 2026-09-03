@@ -9,8 +9,11 @@ alwaysApply: false
 `docker/docker-compose.yml` runs:
 
 - DB service — MariaDB + `docker/init/*.sql` (schema, then privilege lockdown)
-- Web service — `php:8.1-apache` (`docker/Dockerfile` adds `pdo_mysql`), project
-  root bind-mounted; published on host port **8080**
+- Web service — PHP 5.4.45 Apache via `cyberpoison/php:5.4-apache`
+  (`docker/Dockerfile` adds `pdo_mysql`; official `php:5.4.45-apache` is
+  schema-1 and unusable on modern Docker), project root bind-mounted;
+  published on host port **8080**. Local image tracks 5.4.45; production is
+  5.4.16.
 
 `docker/seed_junk_data.php` is mostly schema-driven (`INFORMATION_SCHEMA`).
 A few physically bounded quantities are special-cased by column name; if those

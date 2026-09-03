@@ -15,6 +15,7 @@
 *.local.php
 
 # ----- Local / scratch backups -----
+backup/
 *.bak
 *.bak.*
 *.orig

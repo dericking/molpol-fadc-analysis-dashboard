@@ -34,7 +34,7 @@ ini_set('log_errors', '1');
  * catalog, no render helpers — whatever this needs may be the thing that just
  * failed.
  */
-function bootstrap_fail_page(): void
+function bootstrap_fail_page()
 {
     if (headers_sent()) {
         // Response already on the wire; a status code is no longer possible,
@@ -64,10 +64,10 @@ function bootstrap_fail_page(): void
 }
 
 /**
- * Uncaught throwables — most often a PDOException after an upstream schema
+ * Uncaught exceptions — most often a PDOException after an upstream schema
  * change. Registered before the connection so every query is covered.
  */
-set_exception_handler(static function (Throwable $e): void {
+set_exception_handler(static function (Exception $e) {
     error_log(sprintf(
         'Unhandled %s: %s in %s:%d',
         get_class($e),
@@ -80,11 +80,11 @@ set_exception_handler(static function (Throwable $e): void {
 });
 
 /**
- * Fatal errors are not throwables, so the handler above never sees them — a
+ * Fatal errors are not exceptions, so the handler above never sees them — a
  * missing require (a layout file moved or renamed) is the realistic case.
  * Shutdown is the only hook left at that point.
  */
-register_shutdown_function(static function (): void {
+register_shutdown_function(static function () {
     if (!empty($GLOBALS['bootstrap_failed'])) {
         return; // Already handled as an exception; don't render twice.
     }

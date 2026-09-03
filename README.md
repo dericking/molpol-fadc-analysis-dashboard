@@ -8,7 +8,7 @@ columns with useful `COLUMN_COMMENT`s appear without a PHP change.
 What shows where (cards, tables, detail sections) is maintained under
 `includes/layouts/`.
 
-**Stack:** PHP 8.1 (no framework), PDO prepared statements,
+**Stack:** PHP 5.4 (production target; Docker tests on 5.4.45), plain (no framework), PDO prepared statements,
 `assets/style.css`, minimal `assets/site.js` (filter autosubmit +
 advanced column picker) so CSP can use `script-src 'self'`.
 Run Info / Group Info are CSS `:target` modals — no JS framework or
