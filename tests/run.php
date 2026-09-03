@@ -46,6 +46,10 @@ assert_eq('Friday, July 31, 2026', isset($linux['label']) ? $linux['label'] : nu
 $pad = parse_stored_calendar_date('Fri Jul  4 16:54:21 EDT 2026');
 assert_eq('2026-07-04', isset($pad['key']) ? $pad['key'] : null, 'Linux date space-padded day → key');
 
+$noTz = parse_stored_calendar_date('Mon Aug 17 15:43:02 2026');
+assert_eq('2026-08-17', isset($noTz['key']) ? $noTz['key'] : null, 'Linux date no TZ → key');
+assert_eq('Monday, August 17, 2026', isset($noTz['label']) ? $noTz['label'] : null, 'Linux date no TZ → label');
+
 assert_eq(null, parse_stored_calendar_date(''), 'empty stamp → null');
 assert_eq(null, parse_stored_calendar_date(null), 'null stamp → null');
 
