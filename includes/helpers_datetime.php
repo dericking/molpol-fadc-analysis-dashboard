@@ -42,7 +42,9 @@ function expand_date_abbr($abbr, $kind)
 
 /**
  * Calendar date as written in a stored timestamp string — no timezone conversion.
- * Supports Linux `date` text ("Fri Jul 31 16:54:21 EDT 2026") and "Y-m-d H:i:s".
+ * Supports Linux `date` text with or without timezone
+ * ("Fri Jul 31 16:54:21 EDT 2026" / "Mon Aug 17 15:43:02 2026")
+ * and "Y-m-d H:i:s".
  *
  * @return array{key: string, label: string}|null  key is Y-m-d for sorting/bucketing
  */
@@ -70,9 +72,10 @@ function parse_stored_calendar_date($value)
         );
     }
 
-    // Linux date: Fri Jul 31 16:54:21 EDT 2026
+    // Linux date, TZ optional: Fri Jul 31 16:54:21 EDT 2026
+    // or Don's live form:      Mon Aug 17 15:43:02 2026
     if (preg_match(
-        '/^(\w{3})\s+(\w{3})\s+(\d{1,2})\s+\d{1,2}:\d{2}:\d{2}\s+\S+\s+(\d{4})$/',
+        '/^(\w{3})\s+(\w{3})\s+(\d{1,2})\s+\d{1,2}:\d{2}:\d{2}(?:\s+[A-Za-z]{2,5})?\s+(\d{4})$/',
         $value,
         $m
     )) {
