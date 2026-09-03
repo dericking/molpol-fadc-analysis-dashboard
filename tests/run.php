@@ -57,8 +57,8 @@ assert_eq('16:54:21', format_time_only('2026-07-31 16:54:21'), 'format_time_only
 assert_eq('16:54:21', format_time_only('Fri Jul 31 16:54:21 EDT 2026'), 'format_time_only Linux');
 assert_eq('—', format_time_only(null), 'format_time_only null');
 
-$sql = sql_expr_stamp_as_date('r.run_start');
-assert_true((strpos($sql, '`r`.`run_start`') !== false), 'sql_expr qualifies alias.column');
+$sql = sql_expr_stamp_as_date('r.run_start_datetime');
+assert_true((strpos($sql, '`r`.`run_start_datetime`') !== false), 'sql_expr qualifies alias.column');
 assert_true((strpos($sql, 'STR_TO_DATE') !== false), 'sql_expr has Linux branch');
 assert_eq('NULL', sql_expr_stamp_as_date('r; drop'), 'sql_expr rejects junk identifier');
 

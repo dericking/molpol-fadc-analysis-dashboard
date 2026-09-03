@@ -115,7 +115,7 @@ HTML
   <li>Experiment is an exact match on <code>Run_info.run_experiment</code>
       (groups: any member run with that experiment).</li>
   <li>Dates are an inclusive calendar-day range on
-      <code>run_start</code> / <code>group_start</code>.</li>
+      <code>run_start_datetime</code> / <code>group_start</code>.</li>
 </ul>
 HTML
 ,
@@ -237,7 +237,7 @@ HTML
         'title'   => 'Index date column missing',
         'body'    => <<<'HTML'
 <p>The run/group list groups rows by calendar day using
-<code>Run_info.run_start</code> or <code>Grouped_Analysis.group_start</code>.
+<code>Run_info.run_start_datetime</code> or <code>Grouped_Analysis.group_start</code>.
 That column was not found in <code>INFORMATION_SCHEMA</code>.</p>
 <p>The list still loads. Every row is placed under a single
 <strong>Unknown date</strong> heading so the page does not 500. Cards and
@@ -250,7 +250,7 @@ HTML
 ,
         'fix'     => <<<'HTML'
 <ul>
-  <li>Confirm <code>run_start</code> / <code>group_start</code> still exist
+  <li>Confirm <code>run_start_datetime</code> / <code>group_start</code> still exist
       on <code>Run_info</code> / <code>Grouped_Analysis</code>.</li>
   <li>If they were renamed, update the bucket key in
       <code>includes/index_query.php</code> (and the time cells in

@@ -36,6 +36,10 @@
 
 require_once __DIR__ . '/../includes/schema.php';
 
+if (!ini_get('date.timezone')) {
+    date_default_timezone_set('UTC');
+}
+
 $targetRuns = isset($argv[1]) ? max(1, (int)$argv[1]) : 30;
 
 $dbHost = getenv('SITE_DB_HOST') ?: '127.0.0.1';
@@ -53,7 +57,7 @@ $pdo = new PDO(
 
 // Columns that should never get a generated value: primary key (handled
 // explicitly per run) and any auto-managed timestamp.
-const SKIP_COLUMNS = array('run_number', 'last_updated');
+$SKIP_COLUMNS = array('run_number', 'last_updated');
 
 /**
  * PHP 5.4-safe random_int (test seed only).
@@ -61,6 +65,11 @@ const SKIP_COLUMNS = array('run_number', 'last_updated');
 function seed_random_int($min, $max)
 {
     return mt_rand((int)$min, (int)$max);
+}
+
+function seed_pick($choices)
+{
+    return $choices[seed_random_int(0, count($choices) - 1)];
 }
 
 /**
@@ -133,7 +142,7 @@ function random_value_for_column($col)
     ];
     $lookupKey = strtolower($name);
     if (array_key_exists($lookupKey, $boundedRanges)) {
-        [$lo, $hi] = $boundedRanges[$lookupKey];
+        list($lo, $hi) = $boundedRanges[$lookupKey];
         $decimals = 4;
         if (preg_match('/\((\d+),(\d+)\)/', $ctype, $m)) {
             $decimals = (int)$m[2];
@@ -149,8 +158,11 @@ function random_value_for_column($col)
     }
 
     // Linux-'date'-style free-text start/end timestamps (VARCHAR, not DATETIME)
-    if (in_array($name, ['run_start', 'run_end'], true)) {
+    if (in_array($name, array('run_start_datetime', 'run_end_datetime', 'run_start', 'run_end'), true)) {
         return format_linux_date(seed_random_int(strtotime('2026-01-01'), strtotime('2026-12-31')));
+    }
+    if (in_array($name, array('run_start_unix', 'run_end_unix'), true)) {
+        return seed_random_int(strtotime('2026-01-01'), strtotime('2026-12-31'));
     }
 
     if ($type === 'datetime' || $type === 'timestamp') {
@@ -193,7 +205,7 @@ function random_value_for_column($col)
             $precision = (int)$m[1];
             $decimals  = (int)$m[2];
             $intDigits = max(1, $precision - $decimals);
-            $maxMagnitude = (10 ** $intDigits) * 0.9;
+            $maxMagnitude = pow(10, $intDigits) * 0.9;
         }
         $value = (mt_rand(-1000000, 1000000) / 1000000) * $maxMagnitude;
         return round($value, min($decimals, 10));
@@ -204,13 +216,13 @@ function random_value_for_column($col)
             return seed_random_int(0, 1) ? 'IN' : 'OUT';
         }
         if (preg_match('/^epics_hel_pattern$/i', $name)) {
-            return ['pair', 'quartet', 'octet'][seed_random_int(0, 2)];
+            return seed_pick(array('pair', 'quartet', 'octet'));
         }
         if (preg_match('/^epics_n_pass$/i', $name)) {
             return (string) seed_random_int(1, 5);
         }
         if (preg_match('/^epics_las_mode_/i', $name)) {
-            return ['CW', 'Pulsed', 'OFF'][seed_random_int(0, 2)];
+            return seed_pick(array('CW', 'Pulsed', 'OFF'));
         }
         if (preg_match('/^fadc_(crate|slot)$/i', $name)) {
             return $name === 'fadc_crate' || substr(strtolower($name), -5) === 'crate'
@@ -411,7 +423,7 @@ function generate_epics_overrides(){
         'epics_vwien_angle' => round(rand_float(-90, 90), 2),
         'epics_hwien_angle' => round(rand_float(-90, 90), 2),
 
-        'epics_hel_pattern' => ['pair', 'quartet', 'octet'][seed_random_int(0, 2)],
+        'epics_hel_pattern' => seed_pick(array('pair', 'quartet', 'octet')),
         'epics_hel_freq'    => round(rand_float(29.5, 30.5), 6),
         'epics_t_settle'    => round(rand_float(60, 100), 2),
         'epics_t_stable'    => round(rand_float(400, 600), 2),
@@ -540,7 +552,7 @@ function insert_generic_row($pdo, $table, $columns, $runNumber, $overrides = [])
     $vals = [$runNumber];
 
     foreach ($columns as $col) {
-        if (in_array($col['name'], SKIP_COLUMNS, true)) {
+        if (in_array($col['name'], $GLOBALS['SKIP_COLUMNS'], true)) {
             continue;
         }
         $cols[] = $col['name'];
@@ -560,7 +572,7 @@ function insert_grouped_analysis_row($pdo, $columns, $values){
     $cols = [];
     $vals = [];
     foreach ($columns as $col) {
-        if (in_array($col['name'], SKIP_COLUMNS, true)) {
+        if (in_array($col['name'], $GLOBALS['SKIP_COLUMNS'], true)) {
             continue;
         }
         if (!array_key_exists($col['name'], $values)) {
@@ -633,8 +645,10 @@ try {
             insert_generic_row($pdo, 'Run_info', $runInfoColumns, $runNumber, [
                 'run_group'      => $slot['run_group'],
                 'run_experiment' => $experimentCycle[$dayCount % count($experimentCycle)],
-                'run_start'      => format_linux_date($startTs),
-                'run_end'        => format_linux_date($endTs),
+                'run_start_datetime' => format_linux_date($startTs),
+                'run_end_datetime'   => format_linux_date($endTs),
+                'run_start_unix'     => $startTs,
+                'run_end_unix'       => $endTs,
                 'run_length'     => $durationSec,
                 'run_type'       => $slot['run_type'],
                 'run_quality'    => $qualityCycle[$totalRuns % count($qualityCycle)],
@@ -695,10 +709,10 @@ try {
             'group_comment' => "Grouped analysis for {$groupType} group {$gid}.",
             'group_start'   => date('Y-m-d H:i:s', $data['start_ts']),
             'group_end'     => date('Y-m-d H:i:s', $data['end_ts']),
-            'asym_mol'      => isset($asymAvg[0]) ? asymAvg[0] : null,
-            'asym_mol_err'  => isset($asymAvg[1]) ? asymAvg[1] : null,
-            'pol_beam'      => isset($polAvg[0]) ? polAvg[0] : null,
-            'pol_beam_err'  => isset($polAvg[1]) ? polAvg[1] : null,
+            'asym_mol'      => isset($asymAvg[0]) ? $asymAvg[0] : null,
+            'asym_mol_err'  => isset($asymAvg[1]) ? $asymAvg[1] : null,
+            'pol_beam'      => isset($polAvg[0]) ? $polAvg[0] : null,
+            'pol_beam_err'  => isset($polAvg[1]) ? $polAvg[1] : null,
             'epics_ihwp'    => $ihwpCycle[$groupIndex % 3],
             'epics_wien'    => $wienCycle[$groupIndex % 3],
         ]);
