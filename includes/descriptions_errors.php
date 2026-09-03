@@ -22,14 +22,16 @@ return [
 <p>The detail page loaded the parent run, but there is no matching row in this
 table (Analysis, DAQ_config, or EPICS_data) for that run_number.</p>
 <p>This is normal when prompt or secondary processing has not written a row yet.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm the run exists in Run_info.</li>
   <li>Confirm the analysis / DAQ / EPICS producer wrote a row for this run_number.</li>
   <li>If you expected data, inspect the database table for that run_number.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'empty_group_analysis' => [
@@ -39,13 +41,15 @@ HTML,
 <p>Member runs may already reference this group_number in Run_info, but there is
 not yet a Grouped_Analysis row (the landing spot for group_analysis.C results).</p>
 <p>This is an expected state before final group analysis finishes.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Check Run_info.run_group for member runs.</li>
   <li>Confirm group_analysis.C (or your producer) has inserted Grouped_Analysis.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'empty_group_runs' => [
@@ -54,13 +58,15 @@ HTML,
         'body'    => <<<'HTML'
 <p>A Grouped_Analysis row exists for this group_number, but no Run_info rows
 currently have run_group set to that number.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Check Run_info.run_group values for the intended members.</li>
   <li>See whether runs were reassigned to another group after analysis was written.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'group_missing_run_group_column' => [
@@ -77,7 +83,8 @@ a renamed/dropped FK can still reach this state.</p>
 <p>Grouped_Analysis for this group_number may still render above. The
 member-run list is empty because membership cannot be queried, not because
 no runs are assigned.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm <code>Run_info.run_group</code> still exists.</li>
@@ -85,7 +92,8 @@ HTML,
       <code>detail_groups.php</code> (and the Group cell in
       <code>includes/layouts/layout_tables.php</code> / Run Info if needed).</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'index_no_match' => [
@@ -94,7 +102,8 @@ HTML,
         'body'    => <<<'HTML'
 <p>The Runs/Groups list query returned no rows for the current type, experiment,
 and/or date filters, and/or run # / group # search.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Clear filters and browse again.</li>
@@ -108,7 +117,8 @@ HTML,
   <li>Dates are an inclusive calendar-day range on
       <code>run_start</code> / <code>group_start</code>.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'report_no_match' => [
@@ -117,14 +127,16 @@ HTML,
         'body'    => <<<'HTML'
 <p>The report query returned no rows for the current view and filters
 (type, experiment, dates, and/or run # / group #).</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Clear filters or widen the date range.</li>
   <li>Confirm the run or group exists in the database.</li>
   <li>Type filter uses lookup <em>codes</em>; experiment is an exact match.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'report_truncated' => [
@@ -134,13 +146,15 @@ HTML,
 <p>More rows matched the filters than <code>report_row_cap</code> in
 <code>includes/config.php</code> allows. The table and CSV include only the
 first cap rows (newest run/group numbers first).</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Narrow type, experiment, or date filters.</li>
   <li>Or raise <code>report_row_cap</code> in <code>includes/config.php</code> if appropriate.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'report_unknown_column' => [
@@ -155,14 +169,16 @@ declared <code>source</code> (<code>run</code> → Run_info,
 a default names a field that is not in the live catalog.</p>
 <p>The report page keeps working: bad entries are omitted from the picker,
 table, and CSV. This is a caretaker signal, not a user error.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Edit <code>layout_report</code> and correct field names and sources.</li>
   <li>Confirm the column exists in MariaDB (<code>INFORMATION_SCHEMA</code> / Don’s schema).</li>
   <li>Reload <code>report.php</code> or <code>report_advanced.php</code> (use <strong>reset columns</strong> if a sticky <code>cols=</code> URL is in play).</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'index_missing_type_column' => [
@@ -176,7 +192,8 @@ and did not find it in <code>INFORMATION_SCHEMA</code>.</p>
 URL is ignored, so the page does not 500.</p>
 <p>Those columns are part of the data model and should always exist. This
 warning is a safety net if they are renamed or dropped.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm <code>run_type</code> / <code>group_type</code> still exist on
@@ -188,7 +205,8 @@ HTML,
       exists; otherwise the dropdown lists distinct codes from the row
       column. Filter SQL still uses the code on the row.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'index_missing_experiment_column' => [
@@ -199,7 +217,8 @@ HTML,
 not find it in <code>INFORMATION_SCHEMA</code>.</p>
 <p>The list still loads. The experiment dropdown is empty and an experiment
 filter in the URL is ignored, so the page does not 500.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm <code>run_experiment</code> still exists on
@@ -209,7 +228,8 @@ HTML,
   <li>If experiments move to a lookup table, keep a text column on the row
       (or JOIN) so the index still has a string to list and filter.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'index_missing_date_column' => [
@@ -226,7 +246,8 @@ A from/to date filter in the URL is ignored until the column is back.</p>
 <p>Rows can also land under Unknown date when the start stamp is empty or
 not ISO / Linux <code>date</code> text. The ⓘ on the heading is only shown
 when the column itself is missing, so those two cases stay distinct.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm <code>run_start</code> / <code>group_start</code> still exist
@@ -236,7 +257,8 @@ HTML,
       <code>includes/layouts/layout_cards.php</code> / <code>includes/layouts/layout_tables.php</code> if
       needed).</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'plot_bad_base' => [
@@ -248,14 +270,16 @@ problem (not merely “this run has no plots folder”).</p>
 <p>Typical causes include an empty filesystem base with an absolute web URL, a
 missing DOCUMENT_ROOT when using a site-relative web base, a missing or
 unreadable plots root, or an empty web base when images need links.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Edit <code>includes/config.php</code> plot path keys (web + filesystem bases).</li>
   <li>Ensure the web server can read the plots root on disk.</li>
   <li>For absolute web URLs, set an explicit <code>*_plots_fs_base</code>.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'plot_missing_id' => [
@@ -266,13 +290,15 @@ HTML,
 this run_number or group_number yet.</p>
 <p>That is often normal: not every analysis produces plots, and folders may be
 created only when images are written.</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm whether the plot producer created <code>{plots_base}/{id}/</code>.</li>
   <li>Check that <code>includes/config.php</code> bases point at the intended tree.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'plot_empty' => [
@@ -281,13 +307,15 @@ HTML,
         'body'    => <<<'HTML'
 <p>The per-id plot directory exists and is readable, but it contains no recognized
 image files (png, jpg, jpeg, gif, webp, svg).</p>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Confirm files were written into the correct <code>{plots_base}/{id}/</code> folder.</li>
   <li>Use a supported image extension on those filenames.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'layout_band_invalid' => [
@@ -302,14 +330,16 @@ Each row is itself an array of classifier section titles (use <code>null</code> 
 ],</pre>
 <p><strong>Incorrect:</strong></p>
 <pre>'main' => 'Section A',</pre>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Edit <code>includes/layouts/layout_sections.php</code> and correct the band shape.</li>
   <li>Reload the detail page.</li>
   <li>Sections that could not be placed may appear under Unallocated Sections until fixed.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
     'layout_flat_list' => [
@@ -328,13 +358,15 @@ and those sections may show under Unallocated Sections.</p>
     'Section A',
     'Section B',
 ],</pre>
-HTML,
+HTML
+,
         'fix'     => <<<'HTML'
 <ul>
   <li>Edit <code>includes/layouts/layout_sections.php</code> for the band named in the on-page warning.</li>
   <li>Wrap section titles in a row array, then reload the detail page.</li>
 </ul>
-HTML,
+HTML
+,
     ],
 
 ];
