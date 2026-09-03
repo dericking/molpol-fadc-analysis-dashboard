@@ -213,7 +213,7 @@ function random_value_for_column($col)
             return ['CW', 'Pulsed', 'OFF'][seed_random_int(0, 2)];
         }
         if (preg_match('/^fadc_(crate|slot)$/i', $name)) {
-            return $name === 'fadc_crate' || str_ends_with(strtolower($name), 'crate')
+            return $name === 'fadc_crate' || substr(strtolower($name), -5) === 'crate'
                 ? 'vme-crate.example'
                 : (string) seed_random_int(3, 8);
         }
@@ -674,7 +674,7 @@ try {
             $totalRuns++;
             $minute += 25;
             if ($minute >= 60) {
-                $hour += intdiv($minute, 60);
+                $hour += (int)($minute / 60);
                 $minute %= 60;
             }
         }

@@ -295,7 +295,7 @@ function render_field_list($columns, $row, $skipColumn = 'run_number'){
             continue;
         }
         // Paired away: base column will absorb this as "value ± error".
-        if (str_ends_with($name, '_err')) {
+        if (substr($name, -4) === '_err') {
             $base = substr($name, 0, -4);
             if (isset($colNameSet[$base])) {
                 continue;
