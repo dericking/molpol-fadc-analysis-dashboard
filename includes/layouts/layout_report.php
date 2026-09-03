@@ -39,8 +39,8 @@ return [
         'defaults' => [
             'run_number',
             'run_group',
-            'run_start',
-            'run_end',
+            'run_start_datetime',
+            'run_end_datetime',
             'leftrate',
             'leftrate_err',
             'rightrate',
@@ -111,8 +111,8 @@ return [
                 [
                     'title' => 'Other Information',
                     'columns' => [
-                        ['field' => 'run_start',      'header' => 'Start',      'source' => 'run'],
-                        ['field' => 'run_end',        'header' => 'End',        'source' => 'run'],
+                        ['field' => 'run_start_datetime', 'header' => 'Start',      'source' => 'run'],
+                        ['field' => 'run_end_datetime',   'header' => 'End',        'source' => 'run'],
                         ['field' => 'run_quality',    'header' => 'Run Quality','source' => 'run', 'kind' => 'quality'],
                         ['field' => 'comment',        'header' => 'Comment',    'source' => 'run'],
                         ['field' => 'run_experiment', 'header' => 'Experiment', 'source' => 'run'],

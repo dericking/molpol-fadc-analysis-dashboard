@@ -6,7 +6,9 @@
  * Uses the same bootstrap / PDO path as the site.
  */
 require_once dirname(__DIR__) . '/includes/bootstrap.php';
-debug_step('list_runs.php: after bootstrap');
+if (function_exists('debug_step')) {
+    debug_step('list_runs.php: after bootstrap');
+}
 
 if (!ini_get('date.timezone')) {
     date_default_timezone_set('UTC');
@@ -17,7 +19,10 @@ header('Content-Type: text/html; charset=utf-8');
 $cap = 200;
 $hasRunInfo = table_exists($pdo, 'Run_info');
 $hasGroupCol = $hasRunInfo && table_has_column($pdo, 'Run_info', 'run_group');
-$hasStartCol = $hasRunInfo && table_has_column($pdo, 'Run_info', 'run_start');
+$startCol = $hasRunInfo
+    ? first_present_column($pdo, 'Run_info', array('run_start_datetime', 'run_start'))
+    : null;
+$hasStartCol = ($startCol !== null);
 $hasTypeCol  = $hasRunInfo && table_has_column($pdo, 'Run_info', 'run_type');
 
 $rows = array();
@@ -34,7 +39,7 @@ if (!$hasRunInfo) {
             $cols[] = '`run_group`';
         }
         if ($hasStartCol) {
-            $cols[] = '`run_start`';
+            $cols[] = '`' . $startCol . '`';
         }
         if ($hasTypeCol) {
             $cols[] = '`run_type`';
@@ -42,7 +47,9 @@ if (!$hasRunInfo) {
         $sql = 'SELECT ' . implode(', ', $cols)
             . ' FROM Run_info ORDER BY run_number DESC LIMIT ' . (int)$cap;
         $rows = $pdo->query($sql)->fetchAll();
-        debug_step('list_runs.php: fetched ' . count($rows) . ' of ' . $total);
+        if (function_exists('debug_step')) {
+            debug_step('list_runs.php: fetched ' . count($rows) . ' of ' . $total);
+        }
     } catch (Exception $e) {
         $error = 'Query failed: ' . $e->getMessage();
     }
@@ -111,7 +118,7 @@ $siteTitle = isset($config['site_title']) ? $config['site_title'] : 'Møller Run
             ?></td>
           <?php endif; ?>
           <?php if ($hasStartCol): ?>
-            <td><?php echo htmlspecialchars(isset($row['run_start']) ? (string)$row['run_start'] : '—'); ?></td>
+            <td><?php echo htmlspecialchars(isset($row[$startCol]) ? (string)$row[$startCol] : '—'); ?></td>
           <?php endif; ?>
           <?php if ($hasTypeCol): ?>
             <td><?php echo htmlspecialchars(isset($row['run_type']) ? (string)$row['run_type'] : '—'); ?></td>

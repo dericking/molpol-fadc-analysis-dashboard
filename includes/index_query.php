@@ -57,8 +57,10 @@ $hasTypeColumn = table_has_column($pdo, $typeTable, $typeColumn);
 $typeColumnMissing = !$hasTypeColumn;
 
 $dateTable  = $typeTable;
-$dateColumn = $view === 'groups' ? 'group_start' : 'run_start';
-$dateColumnMissing = !table_has_column($pdo, $dateTable, $dateColumn);
+$dateColumn = $view === 'groups'
+    ? first_present_column($pdo, 'Grouped_Analysis', array('group_start'))
+    : first_present_column($pdo, 'Run_info', array('run_start_datetime', 'run_start'));
+$dateColumnMissing = ($dateColumn === null);
 
 $hasExperimentColumn = table_has_column($pdo, 'Run_info', 'run_experiment');
 $experimentColumnMissing = !$hasExperimentColumn;
@@ -77,7 +79,7 @@ if ($view === 'runs') {
         $params['experiment'] = $filterExperiment;
     }
     if (($filterDateFrom !== null || $filterDateTo !== null) && !$dateColumnMissing) {
-        $dateExpr = sql_expr_stamp_as_date('run_start');
+        $dateExpr = sql_expr_stamp_as_date($dateColumn);
         if ($filterDateFrom !== null) {
             $where[] = "{$dateExpr} >= :date_from";
             $params['date_from'] = $filterDateFrom;
@@ -110,7 +112,7 @@ if ($view === 'runs') {
         $params['experiment'] = $filterExperiment;
     }
     if (($filterDateFrom !== null || $filterDateTo !== null) && !$dateColumnMissing) {
-        $dateExpr = sql_expr_stamp_as_date('group_start');
+        $dateExpr = sql_expr_stamp_as_date($dateColumn);
         if ($filterDateFrom !== null) {
             $where[] = "{$dateExpr} >= :date_from";
             $params['date_from'] = $filterDateFrom;
@@ -206,7 +208,7 @@ $qs = function ($overrides) use ($defaultView, $defaultLayout, $defaultPanel) {
 
 $dateBuckets = [];
 foreach ($rows as $row) {
-    $rawTs = $view === 'groups' ? (isset($row['group_start']) ? $row['group_start'] : null) : (isset($row['run_start']) ? $row['run_start'] : null);
+    $rawTs = ($dateColumn !== null && isset($row[$dateColumn])) ? $row[$dateColumn] : null;
     $parsed = parse_stored_calendar_date($rawTs !== null ? (string)$rawTs : null);
     if ($parsed !== null) {
         $dateKey = $parsed['key'];

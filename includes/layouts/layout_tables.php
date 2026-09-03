@@ -31,7 +31,7 @@
  *   'columns' => [
  *     ['header' => 'Run Number', 'kind' => 'id', 'field' => 'run_number', 'link' => 'run'],
  *     ['header' => 'Group Number', 'kind' => 'id', 'field' => 'run_group', 'link' => 'group'],
- *     ['header' => 'Run Time', 'kind' => 'time_range', 'start' => 'run_start', 'end' => 'run_end'],
+ *     ['header' => 'Run Time', 'kind' => 'time_range', 'start' => 'run_start_datetime', 'end' => 'run_end_datetime'],
  *     ['header' => 'Run Type', 'kind' => 'text', 'field' => 'run_type'],
  *     ['header' => 'Quality', 'kind' => 'quality', 'field' => 'run_quality'],
  *   ],
@@ -54,7 +54,7 @@ return [
             ['header' => 'Quality',    'kind' => 'quality',    'field' => 'run_quality'],
             ['header' => 'Run Number', 'kind' => 'id',         'field' => 'run_number',  'class' => 'run-number', 'link' => 'run'],
             ['header' => 'Group',      'kind' => 'id',         'field' => 'run_group',   'class' => 'run-group',  'link' => 'group'],
-            ['header' => 'Run Time',   'kind' => 'time_range', 'start' => 'run_start',   'end' => 'run_end',      'class' => 'run-time'],
+            ['header' => 'Run Time',   'kind' => 'time_range', 'start' => 'run_start_datetime',   'end' => 'run_end_datetime',      'class' => 'run-time'],
             ['header' => 'Run Type',   'kind' => 'text',       'field' => 'run_type',    'class' => 'run-type'],
         ],
     ],

@@ -121,7 +121,7 @@ $pageTitle = ((string)(isset($config['site_title']) ? $config['site_title'] : 'M
           <tbody>
             <tr><td><code>run_type</code> / <code>group_type</code></td><td>Type filter (labels from <code>run_type_lookup</code> when present)</td></tr>
             <tr><td><code>run_experiment</code></td><td>Experiment filter</td></tr>
-            <tr><td><code>run_start</code> / <code>group_start</code></td><td>Date buckets and from/to filter</td></tr>
+            <tr><td><code>run_start_datetime</code> / <code>group_start</code></td><td>Date buckets and from/to filter</td></tr>
           </tbody>
         </table>
         <p><strong>Explicit layout catalogs</strong> (not auto-discovered):</p>
@@ -511,7 +511,7 @@ Index cards/tables, Run/Group Info, Report/CSV
       ['kind' =&gt; 'quality', 'field' =&gt; 'run_quality'],
     ],
     [
-      ['kind' =&gt; 'time_range', 'start' =&gt; 'run_start', 'end' =&gt; 'run_end'],
+      ['kind' =&gt; 'time_range', 'start' =&gt; 'run_start_datetime', 'end' =&gt; 'run_end_datetime'],
     ],
   ],
 ],
@@ -581,7 +581,7 @@ Run_info row:        run_quality='GOOD'
       ['kind' =&gt; 'id', 'field' =&gt; 'run_group', 'label' =&gt; 'Group', 'link' =&gt; 'group'],
     ],
     [
-      ['kind' =&gt; 'time_range', 'start' =&gt; 'run_start', 'end' =&gt; 'run_end', 'label' =&gt; 'Run time'],
+      ['kind' =&gt; 'time_range', 'start' =&gt; 'run_start_datetime', 'end' =&gt; 'run_end_datetime', 'label' =&gt; 'Run time'],
     ],
   ],
   'footer' =&gt; [

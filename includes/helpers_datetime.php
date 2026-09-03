@@ -143,6 +143,21 @@ function parse_ymd_query_param($raw)
 }
 
 /**
+ * First candidate column that exists on $table, or null.
+ * Used so index/report follow Don's run_start_datetime without 500ing on
+ * an older clone that still has run_start.
+ */
+function first_present_column($pdo, $table, $candidates)
+{
+    foreach ($candidates as $col) {
+        if (table_has_column($pdo, $table, $col)) {
+            return $col;
+        }
+    }
+    return null;
+}
+
+/**
  * Wall-clock time as written in the stored string (H:i:s), no timezone conversion.
  * Works for Linux date text and "Y-m-d H:i:s".
  */
