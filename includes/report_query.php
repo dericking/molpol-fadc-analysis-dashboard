@@ -19,6 +19,8 @@
  * $reportSiblingHref, $reportSiblingLabel, $siteTitle.
  */
 
+debug_step('report_query: start');
+
 if (!isset($reportScript) || !is_string($reportScript) || $reportScript === '') {
     $reportScript = 'report.php';
 }
@@ -201,7 +203,9 @@ foreach ($params as $key => $val) {
     $stmt->bindValue(":{$key}", $val);
 }
 $stmt->bindValue(':limit', $rowCap + 1, PDO::PARAM_INT);
+debug_step('report_query: execute list query');
 $stmt->execute();
+debug_step('report_query: list query done');
 $rows = $stmt->fetchAll();
 $hasMore = count($rows) > $rowCap;
 if ($hasMore) {

@@ -4,6 +4,7 @@
  * Left nav + one long page (same shell as help_errors.php catalog index).
  */
 require_once __DIR__ . '/includes/bootstrap.php';
+debug_step('help_howto.php: after bootstrap');
 
 $pageTitle = ((string)(isset($config['site_title']) ? $config['site_title'] : 'Møller Run Log')) . ' — How-to';
 ?>

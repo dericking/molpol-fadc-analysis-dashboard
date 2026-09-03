@@ -278,6 +278,9 @@ function section_view_table_map()
  */
 function load_section_view(PDO $pdo, $layoutKey, $id)
 {
+    if (function_exists('debug_step')) {
+        debug_step('load_section_view: start key=' . $layoutKey . ' id=' . $id);
+    }
     $map = section_view_table_map();
     if (!isset($map[$layoutKey])) {
         throw new InvalidArgumentException("Unknown section layout key: {$layoutKey}");
@@ -287,6 +290,9 @@ function load_section_view(PDO $pdo, $layoutKey, $id)
     $sectionCfg = isset($layouts[$layoutKey]) ? $layouts[$layoutKey] : array();
     $exclude = isset($sectionCfg['exclude']) ? $sectionCfg['exclude'] : array($meta['pk'], 'last_updated');
 
+    if (function_exists('debug_step')) {
+        debug_step('load_section_view: fetch ' . $meta['table'] . '.' . $meta['pk']);
+    }
     $row = fetch_row_by_key($pdo, $meta['table'], $meta['pk'], $id);
     $columns = array_values(array_filter(
         get_table_columns($pdo, $meta['table']),

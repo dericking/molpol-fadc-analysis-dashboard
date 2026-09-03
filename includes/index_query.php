@@ -14,6 +14,7 @@
  * $qs, $dateBuckets, $clearHref, $filtersActive, $siteTitle.
  */
 
+debug_step('index_query: start');
 $filterType  = isset($_GET['type']) ? $_GET['type'] : '';
 $filterExperiment = trim((string)(isset($_GET['experiment']) ? $_GET['experiment'] : ''));
 $filterDateFrom = parse_ymd_query_param(isset($_GET['from']) ? $_GET['from'] : '');
@@ -135,8 +136,10 @@ foreach ($params as $key => $val) {
     $stmt->bindValue(":{$key}", $val);
 }
 $stmt->bindValue(':limit', $rowCap + 1, PDO::PARAM_INT);
+debug_step('index_query: execute list query view=' . $view);
 $stmt->execute();
 $rows = $stmt->fetchAll();
+debug_step('index_query: list query returned ' . count($rows) . ' rows');
 $hasMore = count($rows) > $rowCap;
 if ($hasMore) {
     $rows = array_slice($rows, 0, $rowCap);

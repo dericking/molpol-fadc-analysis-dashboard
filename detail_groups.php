@@ -4,6 +4,7 @@
  * (+ plots). Opens if either side exists; 404 only when both are missing.
  */
 require_once __DIR__ . '/includes/bootstrap.php';
+debug_step('detail_groups.php: after bootstrap');
 
 $groupId = require_positive_int_query('group');
 

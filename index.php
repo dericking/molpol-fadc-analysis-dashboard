@@ -6,7 +6,9 @@
  * Data prep: includes/index_query.php
  */
 require_once __DIR__ . '/includes/bootstrap.php';
+debug_step('index.php: after bootstrap');
 require_once __DIR__ . '/includes/index_query.php';
+debug_step('index.php: after index_query');
 ?>
 <!DOCTYPE html>
 <html lang="en">

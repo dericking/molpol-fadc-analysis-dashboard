@@ -8,7 +8,9 @@
  */
 $reportScript = 'report_advanced.php';
 require_once __DIR__ . '/includes/bootstrap.php';
+debug_step('report_advanced.php: after bootstrap');
 require_once __DIR__ . '/includes/report_query.php';
+debug_step('report_advanced.php: after report_query');
 
 if ($format === 'csv') {
     emit_report_csv($view, $selectedColumns, $rows);

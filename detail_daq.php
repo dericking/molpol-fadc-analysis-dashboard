@@ -14,6 +14,7 @@
  *   6. Keep unique header / plots / lists as plain HTML on the page.
  */
 require_once __DIR__ . '/includes/bootstrap.php';
+debug_step('detail_daq.php: after bootstrap');
 
 $runNumber = require_positive_int_query('run');
 $runInfo   = require_row($pdo, 'Run_info', 'run_number', $runNumber, 'Run');

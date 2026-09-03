@@ -96,7 +96,13 @@ function render_empty_state($message){
 function get_error_descriptions(){
     static $catalog = null;
     if ($catalog === null) {
+        if (function_exists('debug_step')) {
+            debug_step('helpers_render: require descriptions_errors.php');
+        }
         $catalog = require __DIR__ . '/descriptions_errors.php';
+        if (function_exists('debug_step')) {
+            debug_step('helpers_render: descriptions_errors.php loaded');
+        }
     }
     return $catalog;
 }

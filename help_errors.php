@@ -10,10 +10,12 @@
  *
  * body / fix from descriptions_errors.php are trusted HTML (catalog only).
  */
-require_once __DIR__ . '/includes/render_helpers.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+debug_step('help_errors.php: after bootstrap');
 
 $key = isset($_GET['key']) ? (string)$_GET['key'] : '';
 $catalog = get_error_descriptions();
+debug_step('help_errors.php: catalog loaded keys=' . count($catalog));
 $isIndex = ($key === '');
 
 if ($isIndex) {
