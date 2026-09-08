@@ -126,8 +126,11 @@ function random_value_for_column(array $col)
     }
 
     // Linux-'date'-style free-text start/end timestamps (VARCHAR, not DATETIME)
-    if (in_array($name, ['run_start', 'run_end'], true)) {
+    if (in_array($name, ['run_start_datetime', 'run_end_datetime', 'run_start', 'run_end'], true)) {
         return format_linux_date(random_int(strtotime('2026-01-01'), strtotime('2026-12-31')));
+    }
+    if (in_array($name, ['run_start_unix', 'run_end_unix'], true)) {
+        return random_int(strtotime('2026-01-01'), strtotime('2026-12-31'));
     }
 
     if ($type === 'datetime' || $type === 'timestamp') {
@@ -613,8 +616,10 @@ try {
             insert_generic_row($pdo, 'Run_info', $runInfoColumns, $runNumber, [
                 'run_group'      => $slot['run_group'],
                 'run_experiment' => $experimentCycle[$dayCount % count($experimentCycle)],
-                'run_start'      => format_linux_date($startTs),
-                'run_end'        => format_linux_date($endTs),
+                'run_start_datetime' => format_linux_date($startTs),
+                'run_end_datetime'   => format_linux_date($endTs),
+                'run_start_unix'     => $startTs,
+                'run_end_unix'       => $endTs,
                 'run_length'     => $durationSec,
                 'run_type'       => $slot['run_type'],
                 'run_quality'    => $qualityCycle[$totalRuns % count($qualityCycle)],

@@ -48,6 +48,10 @@ assert_eq('Friday, July 31, 2026', $linux['label'] ?? null, 'Linux date → labe
 $pad = parse_stored_calendar_date('Fri Jul  4 16:54:21 EDT 2026');
 assert_eq('2026-07-04', $pad['key'] ?? null, 'Linux date space-padded day → key');
 
+$noTz = parse_stored_calendar_date('Mon Aug 17 15:43:02 2026');
+assert_eq('2026-08-17', $noTz['key'] ?? null, 'Linux date no TZ → key');
+assert_eq('Monday, August 17, 2026', $noTz['label'] ?? null, 'Linux date no TZ → label');
+
 assert_eq(null, parse_stored_calendar_date(''), 'empty stamp → null');
 assert_eq(null, parse_stored_calendar_date(null), 'null stamp → null');
 
@@ -59,8 +63,8 @@ assert_eq('16:54:21', format_time_only('2026-07-31 16:54:21'), 'format_time_only
 assert_eq('16:54:21', format_time_only('Fri Jul 31 16:54:21 EDT 2026'), 'format_time_only Linux');
 assert_eq('—', format_time_only(null), 'format_time_only null');
 
-$sql = sql_expr_stamp_as_date('r.run_start');
-assert_true(str_contains($sql, '`r`.`run_start`'), 'sql_expr qualifies alias.column');
+$sql = sql_expr_stamp_as_date('r.run_start_datetime');
+assert_true(str_contains($sql, '`r`.`run_start_datetime`'), 'sql_expr qualifies alias.column');
 assert_true(str_contains($sql, 'STR_TO_DATE'), 'sql_expr has Linux branch');
 assert_eq('NULL', sql_expr_stamp_as_date('r; drop'), 'sql_expr rejects junk identifier');
 
@@ -82,6 +86,8 @@ assert_eq('Bcm Avg', humanize_column_name('epics_bcm_avg'), 'humanize strips epi
 // --- quality_slug (P0-2) ---------------------------------------------------
 assert_eq('pending', quality_slug(null), 'quality null → pending');
 assert_eq('pending', quality_slug(''), 'quality empty → pending');
+assert_eq('pending', quality_slug('PENDING'), 'quality PENDING → pending');
+assert_eq('pending', quality_slug('UNDETERMINED'), 'quality UNDETERMINED → pending');
 assert_eq('good', quality_slug('GOOD'), 'quality GOOD → good');
 assert_eq('unknown', quality_slug('NOT_GOOD'), 'quality NOT_GOOD → unknown');
 assert_eq('unknown', quality_slug('weird!'), 'quality weird! → unknown');

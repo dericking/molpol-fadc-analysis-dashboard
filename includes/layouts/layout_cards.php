@@ -72,7 +72,7 @@ return [
             ],
             [
                 ['kind' => 'text', 'field' => 'run_type', 'class' => 'run-type'],
-                ['kind' => 'time_range', 'start' => 'run_start', 'end' => 'run_end', 'class' => 'run-time'],
+                ['kind' => 'time_range', 'start' => 'run_start_datetime', 'end' => 'run_end_datetime', 'class' => 'run-time'],
             ],
         ],
     ],

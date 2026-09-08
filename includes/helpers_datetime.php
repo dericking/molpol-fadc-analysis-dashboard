@@ -68,9 +68,10 @@ function parse_stored_calendar_date(?string $value): ?array
         ];
     }
 
-    // Linux date: Fri Jul 31 16:54:21 EDT 2026
+    // Linux date, TZ optional: Fri Jul 31 16:54:21 EDT 2026
+    // or Don's live form:      Mon Aug 17 15:43:02 2026
     if (preg_match(
-        '/^(\w{3})\s+(\w{3})\s+(\d{1,2})\s+\d{1,2}:\d{2}:\d{2}\s+\S+\s+(\d{4})$/',
+        '/^(\w{3})\s+(\w{3})\s+(\d{1,2})\s+\d{1,2}:\d{2}:\d{2}(?:\s+[A-Za-z]{2,5})?\s+(\d{4})$/',
         $value,
         $m
     )) {
@@ -100,7 +101,7 @@ function parse_stored_calendar_date(?string $value): ?array
 /**
  * SQL expression that yields a calendar DATE from a stored start stamp
  * (ISO `Y-m-d…` or Linux `date` text). $column is a trusted identifier,
- * optionally qualified as alias.column (e.g. r.run_start).
+ * optionally qualified as alias.column (e.g. r.run_start_datetime).
  */
 function sql_expr_stamp_as_date(string $column): string
 {
@@ -138,6 +139,23 @@ function parse_ymd_query_param($raw): ?string
         return null;
     }
     return sprintf('%04d-%02d-%02d', $y, $mo, $d);
+}
+
+/**
+ * First candidate column that exists on $table, or null.
+ * Used so index/report follow Don's run_start_datetime without 500ing on
+ * an older clone that still has run_start.
+ *
+ * @param list<string> $candidates
+ */
+function first_present_column(PDO $pdo, string $table, array $candidates): ?string
+{
+    foreach ($candidates as $col) {
+        if (table_has_column($pdo, $table, $col)) {
+            return $col;
+        }
+    }
+    return null;
 }
 
 /**

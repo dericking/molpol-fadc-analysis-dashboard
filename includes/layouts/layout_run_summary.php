@@ -46,7 +46,7 @@ return [
             ],
             [
                 ['kind' => 'text', 'field' => 'run_experiment', 'label' => 'Experiment'],
-                ['kind' => 'time_range', 'start' => 'run_start', 'end' => 'run_end', 'label' => 'Run time'],
+                ['kind' => 'time_range', 'start' => 'run_start_datetime', 'end' => 'run_end_datetime', 'label' => 'Run time'],
             ],
         ],
         'footer' => [

@@ -140,7 +140,7 @@ in PHP.
 `run_number`, `group_number`; membership `Run_info.run_group`.
 
 **Expected on list pages** (missing → warn, keep going): `run_type` /
-`group_type`, `run_experiment`, `run_start` / `group_start`.
+`group_type`, `run_experiment`, `run_start_datetime` / `group_start`.
 
 On detail cards, `foo` + `foo_err` render as one `value ± error` row.
 A new table still needs a page (or a `section_view_table_map()` entry) —

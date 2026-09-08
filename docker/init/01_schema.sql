@@ -6,9 +6,9 @@
 -- Local-only additions / fixes vs Don's paste:
 --   * USE app_db (not hamoller_db)
 --   * MIXED kept in run_type_lookup for Grouped_Analysis.group_type
---   * Quality unset code is PENDING / 'Pending' (Don's paste used UNDETERMINED)
+--   * run_start/run_end → run_start_datetime/run_end_datetime + unix (Don Sep 2026)
+--   * Quality unset code includes UNDETERMINED (live default) and PENDING (seed)
 --   * fadcw_offset → fadc_w_offset (typo next to fadc_w_width)
---   * run_end COMMENT spacing
 --   * ENGINE=InnoDB on lookup tables (FK targets)
 --   * fadc_crate COMMENT example uses vme-crate.example (not a real hostname)
 
@@ -42,21 +42,24 @@ INSERT INTO run_quality_lookup (code, display_label) VALUES
     ('GOOD',         'Good'),
     ('BAD',          'Bad'),
     ('SUSPECT',      'Suspect'),
-    ('JUNK',         'Junk'),
-    ('PENDING',      'Pending');
+    ('JUNK',          'Junk'),
+    ('PENDING',       'Pending'),
+    ('UNDETERMINED',  'Undetermined');
 
 -- 1. Run_info Table
 CREATE TABLE IF NOT EXISTS Run_info (
     run_number 	    	   INT UNSIGNED PRIMARY KEY,
     run_group 	    	   INT UNSIGNED,
     run_experiment  	   VARCHAR(255) COMMENT 'Name of experiment',
-    run_start 		       VARCHAR(50) COMMENT 'Start of run time stamp',
-    run_end 		       VARCHAR(50) COMMENT 'End of run time stamp',
+    run_start_datetime     VARCHAR(50) COMMENT 'Start of run time stamp',
+    run_end_datetime       VARCHAR(50) COMMENT 'End of run time stamp',
+    run_start_unix         INT UNSIGNED NULL COMMENT 'Start of run, Unix seconds',
+    run_end_unix           INT UNSIGNED NULL COMMENT 'End of run, Unix seconds',
     run_length             INT UNSIGNED NULL COMMENT 'Run length in seconds',
 
     -- Lookup fields with fixed options (codes FK to run_*_lookup.code).
     run_type     VARCHAR(32) NOT NULL DEFAULT 'OTHER',
-    run_quality  VARCHAR(32) NOT NULL DEFAULT 'PENDING',
+    run_quality  VARCHAR(32) NOT NULL DEFAULT 'UNDETERMINED',
 
     CONSTRAINT fk_run_info_type
         FOREIGN KEY (run_type)

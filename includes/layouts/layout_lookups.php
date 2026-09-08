@@ -26,6 +26,7 @@
  * Lookup *code* => CSS suffix (quality-tag-{slug}). Not display labels.
  * Unknown codes fall back to strtolower(code) if it is [a-z]+, else unknown
  * (not pending — empty/unset still maps to pending in quality_slug()).
+ * UNDETERMINED (live default) shares the pending color on purpose.
  *
  * After editing, reload the page; no rebuild step.
  * =============================================================================
@@ -49,16 +50,18 @@ return [
         'group_quality' => 'run_quality_lookup',
     ],
     'quality_slugs' => [
-        'GOOD'    => 'good',
-        'BAD'     => 'bad',
-        'SUSPECT' => 'suspect',
-        'PENDING' => 'pending',
-        'JUNK'    => 'junk',
+        'GOOD'          => 'good',
+        'BAD'           => 'bad',
+        'SUSPECT'       => 'suspect',
+        'PENDING'       => 'pending',
+        'UNDETERMINED'  => 'pending',
+        'JUNK'          => 'junk',
         // Pre-lookup ENUM values (display English stored on the row).
-        'Good'    => 'good',
-        'Bad'     => 'bad',
-        'Suspect' => 'suspect',
-        'Pending' => 'pending',
-        'Junk'    => 'junk',
+        'Good'          => 'good',
+        'Bad'           => 'bad',
+        'Suspect'       => 'suspect',
+        'Pending'       => 'pending',
+        'Undetermined'  => 'pending',
+        'Junk'          => 'junk',
     ],
 ];
