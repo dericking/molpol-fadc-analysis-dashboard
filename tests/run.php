@@ -84,6 +84,8 @@ assert_eq('Bcm Avg', humanize_column_name('epics_bcm_avg'), 'humanize strips epi
 // --- quality_slug (P0-2) ---------------------------------------------------
 assert_eq('pending', quality_slug(null), 'quality null → pending');
 assert_eq('pending', quality_slug(''), 'quality empty → pending');
+assert_eq('pending', quality_slug('PENDING'), 'quality PENDING → pending');
+assert_eq('pending', quality_slug('UNDETERMINED'), 'quality UNDETERMINED → pending');
 assert_eq('good', quality_slug('GOOD'), 'quality GOOD → good');
 assert_eq('unknown', quality_slug('NOT_GOOD'), 'quality NOT_GOOD → unknown');
 assert_eq('unknown', quality_slug('weird!'), 'quality weird! → unknown');
