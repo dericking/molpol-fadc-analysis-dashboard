@@ -22,8 +22,6 @@
   /* Run/group list table — column header row */
   --list-table-header-bg: var(--paper);
   --list-table-header-text: var(--ink-soft);
-
-  --quality-good: #3a7d5c;
   --quality-bad: #b3492f;
   --quality-suspect: #c08a2e;
   --quality-pending: #767268;
