@@ -163,7 +163,7 @@ fi
 
 for d in "$ROOT" "$INC" "$INC/layouts" "$ROOT/assets"; do
     [ -d "$d" ] || continue
-    if ! ls "$d"/index.html "$d"/index.php >/dev/null 2>&1; then
+    if [ ! -f "$d/index.html" ] && [ ! -f "$d/index.php" ]; then
         echo "  WARNING  ${d#$ROOT/} has no index file — directory is browsable"
         warnings=$((warnings + 1))
     fi
