@@ -224,7 +224,7 @@ function render_unallocated_sections($pack, $heading){
  * not the number of real cards, so a null spacer genuinely holds its slot.
  */
 function render_card_row($rowKeys, $sections, $row){
-    $hasAnyContent = array_filter($rowKeys, function ($k) { return $k !== null && isset($sections[$k]); });
+    $hasAnyContent = array_filter($rowKeys, function ($k) use ($sections) { return $k !== null && isset($sections[$k]); });
     if (!$hasAnyContent) {
         return;
     }
