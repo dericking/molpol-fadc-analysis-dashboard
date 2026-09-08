@@ -168,11 +168,16 @@ return [
             ['match' => 'regex', 'pattern' => '/^fadc_crate$/',                      'section' => 'Crate & Slot Identification'],
             ['match' => 'regex', 'pattern' => '/^fadc_slot$/',                       'section' => 'Crate & Slot Identification'],
 
+            // CODA / TI readout (suggested — live columns have no COMMENT yet)
+            ['match' => 'regex', 'pattern' => '/^block_level$/',                     'section' => 'CODA Block & Buffer'],
+            ['match' => 'regex', 'pattern' => '/^buffer_level$/',                    'section' => 'CODA Block & Buffer'],
+
             // Channel Masks & Operating Modes
             ['match' => 'regex', 'pattern' => '/^fadc_adc_mask$/',                   'section' => 'Channel Masks & Operating Modes'],
             ['match' => 'regex', 'pattern' => '/^fadc_trg_mask$/',                   'section' => 'Channel Masks & Operating Modes'],
             ['match' => 'regex', 'pattern' => '/^fadc_tet_ignore_mask$/',            'section' => 'Channel Masks & Operating Modes'],
             ['match' => 'regex', 'pattern' => '/^fadc_allch_mode$/',                 'section' => 'Channel Masks & Operating Modes'],
+            ['match' => 'regex', 'pattern' => '/^fadc_mode$/',                       'section' => 'Channel Masks & Operating Modes'],
 
             // Windowing & Timing Definitions
             ['match' => 'regex', 'pattern' => '/^fadc_allch_w_offset$/',             'section' => 'Windowing & Timing'],
@@ -186,13 +191,16 @@ return [
 
             // Peak Processing & Pedestal Limits
             ['match' => 'regex', 'pattern' => '/^fadc_allch_npeak$/',                'section' => 'Peak Processing & Pedestal Limits'],
+            ['match' => 'regex', 'pattern' => '/^fadc_allch_nped$/',                 'section' => 'Peak Processing & Pedestal Limits'],
             ['match' => 'regex', 'pattern' => '/^fadc_allch_maxped$/',               'section' => 'Peak Processing & Pedestal Limits'],
             ['match' => 'regex', 'pattern' => '/^fadc_allch_nsat$/',                 'section' => 'Peak Processing & Pedestal Limits'],
             ['match' => 'regex', 'pattern' => '/^fadc_npeak$/',                      'section' => 'Peak Processing & Pedestal Limits'],
+            ['match' => 'regex', 'pattern' => '/^fadc_nped$/',                       'section' => 'Peak Processing & Pedestal Limits'],
             ['match' => 'regex', 'pattern' => '/^fadc_maxped$/',                     'section' => 'Peak Processing & Pedestal Limits'],
             ['match' => 'regex', 'pattern' => '/^fadc_nsat$/',                       'section' => 'Peak Processing & Pedestal Limits'],
 
             // DAC, Gain & Accumulator Configuration
+            ['match' => 'regex', 'pattern' => '/^fadc_allch_dac$/',                  'section' => 'DAC, Gain & Accumulator'],
             ['match' => 'regex', 'pattern' => '/^fadc_dac$/',                        'section' => 'DAC, Gain & Accumulator'],
             ['match' => 'regex', 'pattern' => '/^fadc_gain$/',                       'section' => 'DAC, Gain & Accumulator'],
             ['match' => 'regex', 'pattern' => '/^fadc_accumulator_scaler_mode_mask$/','section' => 'DAC, Gain & Accumulator'],
@@ -227,9 +235,9 @@ return [
             ],
             'other' => [
                 [
+                    'CODA Block & Buffer',
                     'Møller Discriminator & Trigger Logic',
                     'Pedestal & Channel Thresholds',
-                    null,
                     null,
                 ],
             ],
