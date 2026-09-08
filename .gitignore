@@ -68,6 +68,9 @@ docker/docker-compose.override.yml
 coverage/
 .htmlcov/
 
+# ----- Local notes -----
+TODO.md
+
 # ----- Misc -----
 *.pid
 .cache/
