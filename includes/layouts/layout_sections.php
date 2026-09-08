@@ -168,7 +168,7 @@ return [
             ['match' => 'regex', 'pattern' => '/^fadc_crate$/',                      'section' => 'Crate & Slot Identification'],
             ['match' => 'regex', 'pattern' => '/^fadc_slot$/',                       'section' => 'Crate & Slot Identification'],
 
-            // CODA / TI readout (suggested — live columns have no COMMENT yet)
+            // CODA / TI readout (name confirmed; live columns have no COMMENT yet)
             ['match' => 'regex', 'pattern' => '/^block_level$/',                     'section' => 'CODA Block & Buffer'],
             ['match' => 'regex', 'pattern' => '/^buffer_level$/',                    'section' => 'CODA Block & Buffer'],
 
